@@ -1,0 +1,13 @@
+Example call of build_splitsets.rb
+./build_splitsets.rb -i ./clustered_sequences/sprot_go_original.f -s 80 -o ./clustered_sequences/cv_whatever/ -f 10 -p
+
+Builds the training, testing and holdoutsets out of the sequencefile given after the -i parameter (./clustered_sequences/sprot_go_original.f). 
+The test/training set for a 10 fold (-f parameter) crossvalidation  will contain 80% (-s parameter) of the sequences contained in ./clustered_sequences/sprot_go_original.f.
+The -p options aktivates the plotting of the distributions of the GO anntations within ./clustered_sequences/sprot_go_original.f. -p is optional.
+All outputfiles are put into ./clustered_sequences/cv_whatever/ (-o parameter)
+Files contained in the folder are: 
+cv_split_80_i   i = 1-10           # The 10 sets for crossvalidation 
+holdout80_set.f                    # holdout set containing 20% of the sequences from sprot_go_original.f
+crossvalidation_combinatorics.txt  # tabular file where each ,ine represents one combination of the 10 crossvalidation sets (cv_split_80_i). 
+                                   # The last file is always the testset!
+Rplots80.pdf                       # Plots for the distributions 

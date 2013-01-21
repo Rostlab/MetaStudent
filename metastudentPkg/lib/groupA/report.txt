@@ -1,0 +1,40 @@
+GOSSIP - predicting Gene Ontology (GO) terms on protein sequences - REPORT
+
+Group
+	GO-Parser, Validation: 	Boehm Ariane, Mahlich Yannick
+	Prediction: Braun Tatjana, Kassner Rebecca, Landerer Cedric
+	
+
+Prediction-Algorithm
+
+- Input: database, target proteins (fasta format), outputfolder
+- Steps (for each of the target proteins):
+	Blast run against the database and storage of the GO terms and corresponding E-Values  of the k most similar sequences to the target protein
+	4 different methods to select  GO terms among the ones found with blast:
+		EValue: only GO terms found in a sequence with an EValue of at least x are chosen. (If a certain GO term is found in different sequences, the average of the corresponding EValues is taken)
+		Unweighted: all GO terms corresponding to the similar sequences are chosen
+		SimpleCount: a GO term is chosen if it is found in at least y sequences
+		EValueCount: Both, EValue and the number of occurrences of a certain GO term, are taken into account
+	Filtering of the remaining GO terms:
+		Parents are removed
+		Distinction between Molecular Function, Biological Process and Cellular Component (for each class, only 3 GO terms are selected)
+	The remaining GO terms are written to a CAFA and to a validation file
+
+For the Prediction, we used differend Methodes. First we tried with different k (k nearest Neightbors) from 1 (best hit)
+up to 200. for the most sequences, we got just a few results from the blast search, so we desided to use a small k
+of 6. For these 6 Sequences, we compared the amount of GO-Numbers, the GO-Numbers and the e-value for the sequences
+given by Blast. 
+
+In the simple version, we just used the GO-Annotation and how often it is found in the Blast results.
+for the evalue version, we just used the e-value given by Blast and for the final Version, we combined these two
+Scores to be more accurat. 
+
+GO-Parser
+
+-Input: .val-File
+saves these specific elements into a textFile:
+
+* GOTerm
+* Hull of GO-Term
+* longest Way to the root
+* root

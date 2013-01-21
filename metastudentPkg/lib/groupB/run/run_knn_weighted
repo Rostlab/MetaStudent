@@ -1,0 +1,3 @@
+
+
+perl /mnt/project/interres/cafa/methods/groupB/run/knn_weighted -m weighted_knn $*

@@ -1,0 +1,4 @@
+metastudent 1.0
+
+Metastudent predicts GO terms for given amino acid sequences by joining the predictions of various individual classifiers, e.g. based on BLAST
+

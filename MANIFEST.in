@@ -1,0 +1,2 @@
+include *.conf
+include *.1.gz

@@ -1,0 +1,622 @@
+#!/usr/bin/env python2.6
+# -*- coding: utf-8 -*-
+
+# metastudent - Predict GO terms from sequence
+#
+# Written by Tobias Hamp <hampt@rostlab.org>
+#
+# Copyright (c) 2012-2013 Tobias Hamp <hampt@rostlab.org>
+
+import tempfile
+from getopt import getopt, GetoptError
+import sys
+import os
+from shutil import copy2, rmtree
+import random
+import math
+from ConfigParser import RawConfigParser
+import collections
+from metastudentPkg.runMethods import runBlast, runMethodA, runMethodB,\
+	runMethodC, getPkgPath, p, silent, setSilent, isSilent
+from metastudentPkg.Logger import Logger
+import commands
+import metastudentPkg
+
+configMap=None
+metastudentPath=""
+metastudentPkgPath=""
+dataPkgPath=""
+
+def usage():
+	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--kickstart-dir=<WORKDIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
+
+
+
+
+"""
+calculate coefficients for linear combinations of results
+"""
+def metaPredict(preds, onto):
+	protToTermToGroupToScore = collections.defaultdict(dict)
+	for i, group in enumerate(["A", "B", "C"]):
+		for line in preds[i]:
+			if line != "\n":
+				prot, goTerm, score = line.split("\t")
+				protToTermToGroupToScore[prot].setdefault(goTerm,{})[group] = float(score)
+
+	weightA = float(configMap["GROUP_A_WEIGHT_%s" % (onto)])
+	weightB = float(configMap["GROUP_B_WEIGHT_%s" % (onto)])
+	weightC = float(configMap["GROUP_C_WEIGHT_%s" % (onto)])
+	intercept = float(configMap["INTERCEPT_%s" % (onto)])
+
+	predLines = []
+	for prot in protToTermToGroupToScore.keys():
+		for term, groupToScore in protToTermToGroupToScore[prot].iteritems():
+			groupAScore = groupToScore.get("A", 0.0)
+			groupBScore = groupToScore.get("B", 0.0)
+			groupCScore = groupToScore.get("C", 0.0)
+			metaScore = (weightA * groupAScore) + (weightB * groupBScore) + (weightC * groupCScore) + intercept
+			if metaScore > 0.0:
+				if metaScore > 1.0: metaScore=1.0	
+				predLines.append( prot + "\t" + term + "\t%.2f" % metaScore )
+	return predLines	
+	
+def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds):
+	predLinesA = []
+	predLinesB = []
+	predLinesC = []
+	try:
+		p("Creating tmpDir...")
+		tmpDirPath=""
+		tmpDirPath=tempfile.mkdtemp(prefix=configMap["MYNAME"])
+		p("\tUsing " + tmpDirPath)
+		
+		p("Copying input file to tmpDir...")
+		fastaFilePathLocal=""
+		try:
+			fastaFilePathLocal = os.path.join(tmpDirPath, os.path.basename(inputFastaFilePath)) 
+			copy2(inputFastaFilePath, os.path.join(tmpDirPath, fastaFilePathLocal))
+		except (IOError, os.error), why:
+			Logger.log("Error copying files " + str(why))
+		
+		for i, ontology in enumerate(ontologies):
+			
+			database = os.path.join(os.path.join(configMap["DATABASE_BASE_PATH"], ontology), configMap["BLAST_SRC_%s" % (ontology) ] + ".fasta")
+			
+			suffix="_eval%s_iters%s_src%s.%s.blast" % (configMap["BLAST_EVAL_%s" % (ontology)], configMap["BLAST_ITERS_%s" % (ontology)], configMap["BLAST_SRC_%s" % (ontology)], ontology.lower())	
+			blastOutputFilePathLocal = fastaFilePathLocal+suffix
+			blastKickstartDatabasePath = blastKickstartDatabasePaths[i]
+			
+			if blastKickstartDatabasePath == "": #no kickstart
+				p("Running Blast %s" % (ontology))
+				runBlast(fastaFilePathLocal, database, blastOutputFilePathLocal, tmpDirPath, configMap["BLAST_EVAL_%s" % (ontology)], configMap["BLAST_ITERS_%s" % (ontology)], configMap)
+				blastKickstartDatabasePath = blastOutputFilePathLocal
+			if not blastOnly:
+				predLinesA = runMethodA(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_A_THRESHOLD_%s" % (ontology)], configMap["GROUP_A_K_%s" % (ontology) ], configMap["BLAST_ITERS_%s" % (ontology)], ontology, configMap)
+				predLinesB = runMethodB(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_B_K_%s" % (ontology) ], ontology, configMap)
+				predLinesC = runMethodC(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_C_SCORING_%s" % (ontology) ], ontology, configMap)
+				
+				if allPreds:
+					methodOutputFileA = open(outputFilePath+".%s.%s.txt" % (ontology, "A"),'w')
+					methodOutputFileA.write("\n".join(predLinesA))
+					methodOutputFileA.close()
+					methodOutputFileB = open(outputFilePath+".%s.%s.txt" % (ontology, "B"),'w')
+					methodOutputFileB.write("\n".join(predLinesB))
+					methodOutputFileB.close()
+					methodOutputFileC = open(outputFilePath+".%s.%s.txt" % (ontology, "C"),'w')
+					methodOutputFileC.write("\n".join(predLinesC))
+					methodOutputFileC.close()
+				
+				predLines = metaPredict([predLinesA,predLinesB,predLinesC], ontology)
+				methodOutputFile = open(outputFilePath+".%s.txt" % (ontology),'w')
+				methodOutputFile.write("\n".join(predLines))
+				methodOutputFile.close()
+			if outputBlast:
+				p("copying back blast output")
+				try:
+					copy2(blastOutputFilePathLocal, outputFilePath + suffix )
+				except (IOError, os.error), why:
+					Logger.log("Error copying file " + str(why))
+			
+	except:
+		print >> sys.stderr,"Error occurred: " + str(sys.exc_info()[0].__name__)
+		raise
+		sys.exit(1)
+	finally:
+		if not keepTemp:
+			p("Deleting temp directories...")
+			rmtree(tmpDirPath)
+		p("\n====== Metastudent finished ======\n")
+
+	
+	return (predLinesA,predLinesB,predLinesC)
+
+def formatPath(path):
+	return path.replace("<ms-path>",metastudentPath) \
+		.replace("<pkg-path>", metastudentPkgPath) \
+		.replace("<default-data-package-path>", dataPkgPath) \
+		.replace("<python-package-path>", metastudentPkgPath)
+
+def readConfigFile(configMap, configPath):
+	config = RawConfigParser()
+	try:
+		config.read(configPath)
+	except:
+		Logger.log("Error: Could not properly read config file: " + configPath, level=1)
+		Logger.log("Error type: " + str(sys.exc_info()[0].__name__),level=1)
+		sys.exit(1)
+	
+	
+	if not config.has_section("General"):
+		Logger.log("Error: config file " + configPath + " does not have a [General] section")
+	else:
+		if config.has_option('General', 'MYNAME'):
+			configMap["MYNAME"] =  config.get('General', 'MYNAME')	
+		if config.has_option('General', 'TMPDIR'):
+			if config.get('General', 'TMPDIR') == "":
+				configMap["TMPDIR"]=tempfile.gettempdir()
+			elif config.get('General', 'TMPDIR') == "base":
+				tmpPath = os.path.join(os.path.join(metastudentPath, "tmp"))
+				if not os.path.exists(tmpPath):
+					os.mkdir(tmpPath)
+				configMap["TMPDIR"] = tmpPath
+			else:
+				if os.path.isdir(config.get('General', 'TMPDIR')):
+					configMap["TMPDIR"]=config.get('General', 'TMPDIR')
+				else:
+					print >> sys.stderr,"Wrong argument for option TMPDIR"
+					sys.exit(1)
+		if config.has_option('General', "BLASTPGP_EXE_PATH"):
+			if os.path.exists(config.get('General', 'BLASTPGP_EXE_PATH')):
+				configMap["BLASTPGP_EXE_PATH"]=config.get('General', 'BLASTPGP_EXE_PATH')
+			else:
+				print >> sys.stderr,"Wrong argument for option BLASTPGP_EXE_PATH"
+				sys.exit(1)
+		if config.has_option('General', "DATABASE_BASE_PATH"):
+			configMap["DATABASE_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_BASE_PATH'))
+			if not os.path.isdir(formatPath(config.get('General', 'DATABASE_BASE_PATH'))):
+				print >> sys.stderr,"Warning: DATABASE_BASE_PATH (%s) does not exist. Will try to download data." % formatPath(config.get('General', 'DATABASE_BASE_PATH'))
+		if config.has_option('General', "FASTA_SPLIT_SIZE"):
+			try:
+				configMap["FASTA_SPLIT_SIZE"]=int(config.get('General', 'FASTA_SPLIT_SIZE'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option FASTA_SPLIT_SIZE"
+				sys.exit(1)
+		if config.has_option('General', 'GROUP_A_PATH'):
+			if os.path.isdir(formatPath(config.get('General', 'GROUP_A_PATH'))):
+				configMap["GROUP_A_PATH"]=formatPath(config.get('General', 'GROUP_A_PATH'))
+			else:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_PATH"
+				sys.exit(1)	
+		if config.has_option('General', 'GROUP_B_PATH'):
+			if os.path.isdir(formatPath(config.get('General', 'GROUP_B_PATH'))):
+				configMap["GROUP_B_PATH"]=formatPath(config.get('General', 'GROUP_B_PATH'))
+			else:
+				print >> sys.stderr,"Wrong argument for option GROUP_B_PATH"
+				sys.exit(1)	
+		if config.has_option('General', 'GROUP_C_PATH'):
+			if os.path.isdir(formatPath(config.get('General', 'GROUP_C_PATH'))):
+				configMap["GROUP_C_PATH"]=formatPath(config.get('General', 'GROUP_C_PATH'))
+			else:
+				print >> sys.stderr,"Wrong argument for option GROUP_C_PATH"
+				sys.exit(1)	
+				
+		if config.has_option('General', "GROUP_A_WEIGHT_MFO"):
+			try:
+				configMap["GROUP_A_WEIGHT_MFO"]=float(config.get('General', 'GROUP_A_WEIGHT_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_WEIGHT_MFO"
+				sys.exit(1)
+		if config.has_option('General', "GROUP_B_WEIGHT_MFO"):
+			try:
+				configMap["GROUP_B_WEIGHT_MFO"]=float(config.get('General', 'GROUP_B_WEIGHT_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_B_WEIGHT_MFO"
+				sys.exit(1)
+		if config.has_option('General', "GROUP_C_WEIGHT_MFO"):
+			try:
+				configMap["GROUP_C_WEIGHT_MFO"]=float(config.get('General', 'GROUP_C_WEIGHT_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_C_WEIGHT_MFO"
+				sys.exit(1)
+		if config.has_option('General', "INTERCEPT_MFO"):
+			try:
+				configMap["INTERCEPT_MFO"]=float(config.get('General', 'INTERCEPT_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option INTERCEPT_MFO"
+				sys.exit(1)
+				
+		if config.has_option('General', "GROUP_A_THRESHOLD_MFO"):
+			try:
+				float(config.get('General', 'GROUP_A_THRESHOLD_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_THRESHOLD_MFO"
+				sys.exit(1)
+			configMap["GROUP_A_THRESHOLD_MFO"]=config.get('General', 'GROUP_A_THRESHOLD_MFO')
+		if config.has_option('General', "GROUP_A_K_MFO"):
+			try:
+				int(config.get('General', 'GROUP_A_K_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_K_MFO"
+				sys.exit(1)
+			configMap["GROUP_A_K_MFO"]=config.get('General', 'GROUP_A_K_MFO')
+		if config.has_option('General', "GROUP_B_K_MFO"):
+			try:
+				int(config.get('General', 'GROUP_B_K_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_B_K_MFO"
+				sys.exit(1)
+			configMap["GROUP_B_K_MFO"]=config.get('General', 'GROUP_B_K_MFO')
+		if config.has_option('General', "GROUP_C_SCORING_MFO"):
+			try:
+				int(config.get('General', 'GROUP_C_SCORING_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_C_SCORING_MFO"
+				sys.exit(1)
+			configMap["GROUP_C_SCORING_MFO"]=config.get('General', 'GROUP_C_SCORING_MFO')
+		if config.has_option('General', "BLAST_EVAL_MFO"):
+			try:
+				float(config.get('General', 'BLAST_EVAL_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option BLAST_EVAL_MFO"
+				sys.exit(1)
+			configMap["BLAST_EVAL_MFO"]=config.get('General', 'BLAST_EVAL_MFO')
+		if config.has_option('General', "BLAST_ITERS_MFO"):
+			try:
+				int(config.get('General', 'BLAST_ITERS_MFO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option BLAST_ITERS_MFO"
+				sys.exit(1)
+			configMap["BLAST_ITERS_MFO"]=config.get('General', 'BLAST_ITERS_MFO')
+		if config.has_option('General', "BLAST_SRC_MFO"):
+			if config.get('General', 'BLAST_SRC_MFO') in ["all","exp"]:
+				configMap["BLAST_SRC_MFO"] = config.get('General', 'BLAST_SRC_MFO')
+			else:
+				print >> sys.stderr,"Wrong argument for option BLAST_SRC_MFO"
+				sys.exit(1)
+				
+		if config.has_option('General', "GROUP_A_WEIGHT_BPO"):
+			try:
+				configMap["GROUP_A_WEIGHT_BPO"]=float(config.get('General', 'GROUP_A_WEIGHT_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_WEIGHT_BPO"
+				sys.exit(1)
+		if config.has_option('General', "GROUP_B_WEIGHT_BPO"):
+			try:
+				configMap["GROUP_B_WEIGHT_BPO"]=float(config.get('General', 'GROUP_B_WEIGHT_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_B_WEIGHT_BPO"
+				sys.exit(1)
+		if config.has_option('General', "GROUP_C_WEIGHT_BPO"):
+			try:
+				configMap["GROUP_C_WEIGHT_BPO"]=float(config.get('General', 'GROUP_C_WEIGHT_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_C_WEIGHT_BPO"
+				sys.exit(1)
+		if config.has_option('General', "INTERCEPT_BPO"):
+			try:
+				configMap["INTERCEPT_BPO"]=float(config.get('General', 'INTERCEPT_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option INTERCEPT_BPO"
+				sys.exit(1)
+				
+		if config.has_option('General', "GROUP_A_THRESHOLD_BPO"):
+			try:
+				float(config.get('General', 'GROUP_A_THRESHOLD_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_THRESHOLD_BPO"
+				sys.exit(1)
+			configMap["GROUP_A_THRESHOLD_BPO"]=config.get('General', 'GROUP_A_THRESHOLD_BPO')
+		if config.has_option('General', "GROUP_A_K_BPO"):
+			try:
+				int(config.get('General', 'GROUP_A_K_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_K_BPO"
+				sys.exit(1)
+			configMap["GROUP_A_K_BPO"]=config.get('General', 'GROUP_A_K_BPO')
+		if config.has_option('General', "GROUP_B_K_BPO"):
+			try:
+				int(config.get('General', 'GROUP_B_K_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_B_K_BPO"
+				sys.exit(1)
+			configMap["GROUP_B_K_BPO"]=config.get('General', 'GROUP_B_K_BPO')
+		if config.has_option('General', "GROUP_C_SCORING_BPO"):
+			try:
+				int(config.get('General', 'GROUP_C_SCORING_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_C_SCORING_BPO"
+				sys.exit(1)
+			configMap["GROUP_C_SCORING_BPO"]=config.get('General', 'GROUP_C_SCORING_BPO')
+		if config.has_option('General', "BLAST_EVAL_BPO"):
+			try:
+				float(config.get('General', 'BLAST_EVAL_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option BLAST_EVAL_BPO"
+				sys.exit(1)
+			configMap["BLAST_EVAL_BPO"]=config.get('General', 'BLAST_EVAL_BPO')
+		if config.has_option('General', "BLAST_ITERS_BPO"):
+			try:
+				int(config.get('General', 'BLAST_ITERS_BPO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option BLAST_ITERS_BPO"
+				sys.exit(1)
+			configMap["BLAST_ITERS_BPO"]=config.get('General', 'BLAST_ITERS_BPO')
+		if config.has_option('General', "BLAST_SRC_BPO"):
+			if config.get('General', 'BLAST_SRC_BPO') in ["all","exp"]:
+				configMap["BLAST_SRC_BPO"] = config.get('General', 'BLAST_SRC_BPO')
+			else:
+				print >> sys.stderr,"Wrong argument for option BLAST_SRC_BPO"
+				sys.exit(1)
+
+				
+
+if __name__ == "__main__":
+	currentPath = os.getcwd()
+	if hasattr(sys, "frozen"):
+		metastudentPath=os.path.dirname(unicode(sys.executable, sys.getfilesystemencoding( )))
+	else:
+		metastudentPath = os.path.dirname(os.path.abspath(__file__))
+	metastudentPkgPath=getPkgPath()
+	dataPkgPath=os.path.join(sys.prefix, "share", "metastudent-data")
+
+	if commands.getstatusoutput('pp_popcon_cnt -p metastudent')[0] != 0:
+		print >> sys.stderr, "The Rost Lab recommends you install the pp-popularity-contest package that provides pp_popcon_cnt:\n\nsudo apt-get install pp-popularity-contest\n"
+
+
+	try:
+		opts, args=getopt(sys.argv[1:], "hi:o:", ["help", "silent", "keep-temp", "temp-dir=", "version", "config=", "output-blast", "blast-kickstart-databases=", "ontologies=","blast-only","all-predictions"])
+	except GetoptError, err:
+		print >> sys.stderr, str(err)
+		usage()
+		sys.exit(1)
+	
+	inputFastaFilePath=""
+	outputFilePath=""
+	tempDirPath=""
+	customConfigFilePath=""
+	blastKickstartDatabasePaths=["",""]
+	outputBlast=False
+	ontologies=["MFO","BPO"]
+	blastOnly=False
+	keepTemp=False
+	allPreds = False
+
+	Logger(os.path.join(metastudentPath, "metastudent.log"))
+	
+	optArgs = [arg[0] for arg in opts]
+	if "--version" in optArgs:
+		print "1.0"
+		sys.exit(0)
+	if ("-i" not in optArgs and "--kickstart-dir" not in optArgs) or "-o" not in optArgs:
+		usage()
+		sys.exit(1)
+	
+	for o, a in opts:
+		if o == "-i":
+			if os.path.exists(a):
+				inputFastaFilePath=os.path.abspath(a)
+			else:
+				print >> sys.stderr,"Error: Input fasta file does not exist"
+				sys.exit(1)
+		elif o == "-o":
+			if os.path.exists(os.path.dirname(os.path.abspath(a))):
+				try:
+					tmpFile=open(os.path.abspath(a), 'w')
+					tmpFile.close()
+					os.remove(os.path.abspath(a))
+					outputFilePath=os.path.abspath(a)
+				except:
+					print >> sys.stderr,"Error: Cannot open output file for writing"
+					sys.exit(1)
+			else:
+				print >> sys.stderr,"Error: Output file can not be created"
+				sys.exit(1)
+		elif o == "--temp-dir":
+			if os.path.exists(a):
+				tempDirPath=os.path.abspath(a)
+			else:
+				print >> sys.stderr,"Error: Temp directory does not exist."
+				sys.exit(1)
+		elif o == "--config":
+			if os.path.exists(a):
+				customConfigFilePath = a
+			else:
+				print >> sys.stderr,"Error: Config directory does not exist."
+				sys.exit(1)
+		elif o == "--blast-kickstart-databases":
+			blastKickstartDatabasePathsTmp = a.split(",")
+			blastKickstartDatabasePaths=[]
+			for db in blastKickstartDatabasePathsTmp:
+				dbAbs = db
+				if db!="":
+					dbAbs = os.path.abspath(db)
+					if not os.path.exists(dbAbs):
+						print >> sys.stderr,"Error: blast-kickstart-database does not exist."
+						sys.exit(1)
+				blastKickstartDatabasePaths.append(dbAbs)
+			p(blastKickstartDatabasePathsTmp)
+			p(blastKickstartDatabasePaths)
+		elif o in ("-h", "--help"):
+			usage()
+			sys.exit()
+		elif o == "--silent":
+			setSilent(True)
+		elif o == "--blast-only":
+			blastOnly=True
+		elif o == "--output-blast":
+			outputBlast = True
+		elif o == "--keep-temp":
+			keepTemp = True
+		elif o == "--all-predictions":
+			allPreds = True
+		elif o == "--ontologies":
+			ontologies = a.split(",")
+			for ontology in ontologies:
+				if ontology not in ["MFO", "BPO"]:
+					print >> sys.stderr,"Error: unknown ontology: " % (ontology)
+					sys.exit(1)
+		else:
+			assert False, "Error: Unhandled option: " + o
+			sys.exit(1)
+
+	if blastKickstartDatabasePaths != ["",""] and len(ontologies) != len(blastKickstartDatabasePaths):
+		print >> sys.stderr,"Error: number of kickstart databases not equal to number of ontologies."
+		sys.exit(1)
+
+	configPaths = [os.path.join(sys.prefix, "share", "metastudent", "metastudentrc.default"),
+				"/etc/metastudentrc",
+				os.path.expanduser("~/.metastudentrc"),
+				customConfigFilePath]
+	configMap={}
+	if len([readConfigFile(configMap, configPath) for configPath in configPaths if os.path.exists(configPath)]) == 0:
+		print >> sys.stderr,"Error: No config file found"
+		sys.exit(1)
+	
+	if tempDirPath != "":
+		tempfile.tempdir=tempDirPath
+	else:
+		if not os.path.exists(configMap["TMPDIR"]):
+			os.mkdir(configMap["TMPDIR"])
+		tempfile.tempdir=configMap["TMPDIR"]
+	
+	silentString=""
+	if isSilent(): silentString = "--silent"
+	dataCommand = "%s --datadir %s --data-version %s %s " % (os.path.join(metastudentPath, "metastudentdata"), os.path.dirname(configMap["DATABASE_BASE_PATH"]), "1.0.0",silentString)
+	s, o = commands.getstatusoutput(dataCommand)
+	if s != 0:
+		print >> sys.stderr,"Failed to call %s:\nFull output:\n%s" % (dataCommand, o)
+		sys.exit(1);
+	
+	runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds)
+	
+
+"""
+=pod
+
+=head1 NAME
+
+metastudent - predictor of gene ontology terms from protein sequence
+
+=head1 SYNOPSIS
+
+metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--keep-temp] [--silent] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=I<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=I<BLAST_RESULT_FILE(S)>] [--temp-dir=I<DIR>] [--kickstart-dir=I<WORKDIR>] [--config=I<CONFIG_FILE>]
+!!! Make sure your fasta file contains at most 500 sequences !!!
+
+=head1 DESCRIPTION
+
+metastudent predicts GO terms for given amino acid sequences by joining the predictions of various individual classifiers, e.g. based on BLAST
+
+=head2 Output format
+
+<PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
+
+=head1 REFERENCES
+
+=over
+
+=item Hamp, T. Rost, B. et al (2012). Homology-based inference sets the bar high for protein function prediction.
+
+=back
+
+=head1 OPTIONS
+
+=over
+
+=item -i FASTA_FILE
+
+The input fasta file. Please try to remove any special formattings (e.g. whitespaces) in the sequences before using them as input. Due to high memory usage, make sure your fasta file contains at most 500 sequences.
+
+=item -o RESULT_FILE_PREFIX
+
+The file name prefix of the output files. GO terms are organized in ontologies. Metatstudent treats each ontology differently and outputs one result file for each. For example, if <RESULT_FILE>=./myresult and MFO and BPO ontologies are selected (see option B<--ontologies>), then metastudent creates two output files: ./myresult.MFO.txt and ./myresult.BPO.txt
+
+=item --keep-temp
+
+Whether to keep the temp directories after metastudent has finished (they can be useful when errors occur or in combination with B<--blast-kickstart-databases>).
+
+=item --silent
+
+No progress messages (stdout), only errors (stderr).
+
+=item --output-blast
+
+Whether to output the result of the BLAST runs. Useful in combination with B<--blast-kickstart-databases>. Output file name format is I<RESULT_FILE_PREFIX>.<BLAST_OPTIONS>.blast.
+
+=item --blast-only
+
+Whether to only output the result of the BLAST runs, and nothing else. See options I<--output-blast> and I<--blast-kickstart-databases>.
+
+=item --all-predictions
+
+Whether to output the prediction results of the individual predictors. File name format of the output file is <RESULT_FILE_PREFIX>.<ONTOLOGY>.<METHOD>.txt.
+
+=item --ontologies=I<MFO or BPO or MFO,BPO>
+
+A comma separated list of ontologies to create predictions for. Default is MFO,BPO. If used in combination with B<--blast-kickstart-databases>, the number and order of the ontologies must correspond to the kickstart files.
+
+=item --blast-kickstart-databases=<BLAST_RESULT_FILES>
+
+Since running BLAST is usually the part that takes the longest in metastudent, this option allows you to re-use the output of a previous run. This is useful to test, for example, different parameters or when you have lost a prediction. The number of kickstart files must correspond to the number of ontologies (see option B<--ontologies>). Separate the files paths with commas. For example: --blast-kickstart-databases=<RESULT_FILE_MFO>,<RESULT_FILE_BPO> (kickstart for both ontologies) or --blast-kickstart-databases=,<RESULT_FILE_BPO> (only kickstart BPO; note the comma).
+
+=item --temp-dir=DIR
+
+The parent temp directory to use instead of the one specified with tmpDir in the metastudent configuration file.
+
+=item --config=FILE
+
+The path to a custom metastudent configuration file; overrides all settings of the configuration files found in the FILES section of this man page.
+
+=back
+
+=head1 FILES
+
+=over
+
+=item F<<< <package_data_dir>/metastudentrc.default >>>
+
+The metastudent configuration file.
+
+=item F<<< <sysconfdir>/metastudentrc >>>
+
+The metastudent configuration file, overrides F<<< <package_data_dir>/metastudentrc.default >>>.
+
+=item F<<< <homedir>/.metastudentrc >>>
+
+The metastudent configuration file, overrides F<<< <sysconfdir>/metastudentrc >>>.
+
+=back
+
+=head1 EXAMPLES
+
+The example F<test.fasta> file can be found in F<<< <package_doc_dir>/examples >>> (usually F</usr/share/doc/metastudent/examples>).
+
+=over
+
+=item Predict the GO terms for the sequences in test.fasta for both the MFO and the BPO ontology:
+
+ metastudent -i test.fasta -o test.result
+
+=item Create the BLAST output to predict the MFO terms for sequences in test.fasta (not the actual predictions, yet; see next example).
+
+ metastudent -i test.fasta -o test.result --blast-only --output-blast --ontologies=MFO
+
+=item Predict the MFO and BPO terms for sequences in test.fasta with a precomputed MFO BLAST output (see previous example; note the comma at the end).
+
+ metastudent -i test.fasta -o test.result --ontologies=MFO,BPO --blast-kickstart-databases=test.result_eval0.001_iters3_srcexp.mfo.blast,
+
+=back
+
+=head1 BUGS
+
+Please use this link to report bugs:
+
+L<https://rostlab.org/bugzilla3/enter_bug.cgi?product=metastudent>
+
+=head1 AUTHOR
+
+Tobias Hamp <hampt@rostlab.org>
+
+=cut
+"""
+

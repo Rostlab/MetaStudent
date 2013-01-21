@@ -1,0 +1,232 @@
+
+
+use strict;
+use Cwd;
+use Getopt::Std;
+use File::Basename;
+use IPC::Open3;
+use File::chdir;
+
+# ensure working directory is right
+print "-> working directory: ", cwd(), "\n";
+
+# kNN parameters
+my $closure = "data/fullTransitiveClosureGO.txt";
+my $goterms = "data/goterm.txt";
+my $distribution = "data/weighted.dist";
+
+
+# 5 = global unweighted, 6 = global log, 7 = global log log
+my $scorecolumn = 6;
+
+
+# ------------------------------------------------
+
+sub usage() {
+	print "Usage: -d <blast database> -i <fasta file with targets> -o <output_folder>\n\n";
+	exit(-1);
+}
+
+# checks the FASTA target file if we have to perform on-the-fly evaluation and for the number of targets
+sub prepare_evaluation {
+
+	open(TARGETS, "<$_[0]");
+
+	my $num_targets = 0;
+	my $do_evaluation = 0;
+
+	# read the entire target FASTA file
+	while(my $line=<TARGETS>)
+	{
+		# check for FASTA header lines
+		if(index($line, ">") == 0)
+		{
+			# check first FASTA header if we have to activate evaluation
+			if($num_targets == 0)
+			{
+				# check if first FASTA header contains a comma -> 
+				# for safety, we also check if the header matches a GO-term (just to be sure...)
+				if((index($line, ",") >=0) or (index($line, "GO:") >= 0))
+				{
+					$do_evaluation = 1;
+				}
+			}
+
+			$num_targets++;
+		}
+	}	
+
+	close(TARGETS);
+
+	return ($do_evaluation, $num_targets);
+
+}
+
+# ------------------------------------------------
+
+# get command line arguments
+my $opt_string = 't:x:k:e:m:i:d:o:hj:';
+my %opt = ();
+getopts( "$opt_string", \%opt );
+
+if(not defined $opt{d} or not defined $opt{i} or not defined $opt{o}) { usage(); }
+if(not defined $opt{m}) { die "no prediction mode specified!\n";}
+
+my $knn = "";
+
+my $k = $opt{k};
+my $e = $opt{e};
+my $t = $opt{t}; # h Val
+my $x = $opt{x}; # number iterations
+
+
+
+my $mode = $opt{m};
+my $blastdb = $opt{d};
+my $targets = $opt{i};
+my $output_folder = $opt{o};
+
+# specifying -j <blastresults> allows to skip recalculation of blast results
+my $jumpstart = "";
+if(defined $opt{j}) 
+	{ $jumpstart = $opt{j};}
+
+# check which prediction mode we are using and parametrize according to results obtained from optimization
+if($mode eq "besthit") {
+	print "-> mode: best Blast hit\n";
+	$knn = "-k 1 -nofilter";
+	$scorecolumn = 5;
+	$distribution = "data/besthit.dist";
+} elsif ($mode eq "unweighted_knn") {
+	print "-> mode: unweighted kNN\n";
+	$scorecolumn = 5;
+	$knn = "-k 10";
+	$distribution = "data/unweighted.dist";
+} elsif ($mode eq "weighted_knn") {
+	print "-> mode: weighted kNN\n";
+	$scorecolumn = 6;
+	$knn = "-e 1E-02";
+	$distribution = "data/weighted.dist";
+} else {
+	die "no valid prediction mode specified!\n"
+}
+
+print "-> working directory: \n";
+print "   database: ", $blastdb, "\n"; 
+print "   targets: ", $targets, "\n";
+print "   output folder: ", $output_folder, "\n";  
+
+if((not -e $blastdb) or (not -e $targets) or (not -e $output_folder))
+{
+	print STDERR "\nERROR: blast database/target file/output folder does not exist\n\n";
+	exit;
+}
+
+# also obtain a proper name for the output file
+my $outfile_name = basename($targets);
+my $outfile_path = $output_folder . ( substr($output_folder, length($output_folder)-1, 1) eq "/" ? "" : "/") . $outfile_name . "." . $mode;
+
+# run BLAST or jumpstart
+if($jumpstart eq "") 
+{ 
+	print "-> running BLAST...\n";
+	print `blastpgp -i $targets -d $blastdb -e $e -h $t -j $x > $outfile_path.blastresults`; 
+	# convert to tabular input format
+	#`ruby ../ruby/blast_file_parser_concatfiles.rb $outfile_path.blastresults > $outfile_path.tabularresults`;
+	{
+	  local $CWD;
+	  $CWD[-1] = 'java';
+	  `java BlastFileParser $jumpstart $outfile_path.tabularresults`;
+	}
+} 
+else 
+{
+	print "-> jumpstarting from BLAST results!\n";
+	#`ruby ../ruby/blast_file_parser_concatfiles.rb $jumpstart > $outfile_path.tabularresults`;
+	{
+	  local $CWD;
+	  $CWD[-1] = 'java';
+	  #print "@CWD\n";
+	  print "java -jar BlastFileP.jar BlastFileParser $jumpstart $outfile_path.tabularresults\n";
+	  `java -jar BlastFileP.jar BlastFileParser $jumpstart $outfile_path.tabularresults`;
+	}
+}
+
+#die "stopped";
+
+# run PREDICTION
+print "-> predicting GO-Terms...\n";
+
+my $cc_skipped = 0;
+print "$CWD\n";
+my $cmdline = "cd ..; java -jar pp2.jar pp2.prediction.knn.KNNPredictor -i $outfile_path.tabularresults -o $outfile_path.raw -k $k -d $distribution -c $closure -t $goterms";
+my $pid = open3(0, \*OUT, 0, $cmdline) or die("Could not fork: $!");
+                        
+while(my $line = <OUT>) {
+        print $line;
+	if(index($line, "no DAG nodes for") >= 0)
+		{ $cc_skipped++; }
+}
+
+close(OUT);
+					                         
+waitpid $pid, 0;
+my $exitcode = $? >> 8;
+$exitcode == 0 or die "KNNPredictor crashed. Exit code was $exitcode";
+
+
+#my $predictor_out = `cd ..; java -jar pp2.jar pp2.prediction.knn.KNNPredictor -i $outfile_path.tabularresults -o $outfile_path.raw $knn -d $distribution -c $closure -t $goterms`;
+
+# count how often targets were skipped due to CC filtering...
+
+
+#while ($predictor_out =~ /no DAG nodes for/g) 
+#{ 
+#	$cc_skipped++; 
+#}
+
+#print $predictor_out;
+print "   skipped $cc_skipped targets because they contained only cellular component annotations.\n";
+
+
+#EVALUATE
+my $precision = -1;
+my $recall = -1;
+
+(my $do_evaluation, my $number_targets) = &prepare_evaluation($targets);
+
+if($do_evaluation)
+{
+	print "-> performing on-the-fly evaluation...\n";
+	
+	# check if we want honest evaluation
+	my $honest = "";
+	if(defined $opt{h})
+	{
+		$number_targets -= $cc_skipped;
+		$honest = "-c $number_targets";
+		print "   'honest' evaluation: targets without prediction -> precision and recall set to 0\n";
+	}
+
+	# run evaluation
+	my $eval_out = `cd ../perl; cat $outfile_path.raw.leaves | perl evaluate.pl -g ../data/goterm.txt -t ../data/goterm2term.txt -i -n 1 -p x $honest`;
+	
+	my @lines = split(/\n/, $eval_out);
+	shift @lines;
+	
+	# offset between column (leaves output format) and line index (evaluation output format) is -2
+	my @scores = split(/\t/, $lines[$scorecolumn - 2]);
+	$precision = $scores[1];
+	$recall = $scores[2];
+
+	print "\n   precision: $precision, recall: $recall\n";
+
+}
+
+print "-> converting to CAFA output...\n";
+print "$CWD\n";
+print `cd ..; java -jar pp2Parser.jar pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_leaves -c $scorecolumn -pr $precision -rc $recall`;
+#print `java -classpath '.' pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_allnodes -c $scorecolumn -pr $precision -rc $recall -gc $closure -gn $goterms`;
+
+print "-> output written to $outfile_path.predicted_leaves and\n                     $outfile_path.predicted_allnodes\n";
+
