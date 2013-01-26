@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	pkg_data_ver = None
 	argDataVer="1.0.0"
 	argDataDir="/usr/share/metastudent-data"
-	remoteFtpDir = "ftp://rostlab.org/free"
+	remoteFtpDir = "ftp://rostlab.org/metastudent"
 	remoteFilesysDir = None
 	
 	try:
