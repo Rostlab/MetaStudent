@@ -12,9 +12,11 @@ Architecture: all
 Homepage: http://www.rostlab.org
 Depends: ${misc:Depends}, ${python:Depends}, python (>= 2.6), blast2, default-jre, perl
 Description: predictor of gene ontology terms from protein sequence
- Metastudent predicts gene ontology (GO) terms for protein sequences through
- homology inference from already annotated proteins.
+ Metastudent predicts gene ontology (GO) terms for protein sequences through homology.
  .
- As a first step, it runs a single BLAST query for all targets against a custom BLAST database. 
- The output is then used by three different base classifiers to calculate three separate 
- sets of GO terms. A meta classifier finally converts the three sets into one comprehensive output for each ontology.
+ It first runs a single BLAST query for all targets against a custom BLAST database.
+ This database contains sequences and GO terms of previously annotated proteins. 
+ The output is then used by three different base classifiers.
+ .
+ They calculate three separate sets of GO terms. 
+ Finally, a meta classifier converts the three sets into one.
