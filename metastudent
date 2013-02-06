@@ -562,7 +562,7 @@ A comma separated list of ontologies to create predictions for. Default is MFO,B
 
 =item --blast-kickstart-databases=<BLAST_RESULT_FILES>
 
-Since running BLAST is usually the part that takes the longest in metastudent, this option allows you to re-use the output of a previous run. This is useful to test, for example, different parameters or when you have lost a prediction. The number of kickstart files must correspond to the number of ontologies (see option B<--ontologies>). Separate the files paths with commas. For example: --blast-kickstart-databases=<RESULT_FILE_MFO>,<RESULT_FILE_BPO> (kickstart for both ontologies) or --blast-kickstart-databases=,<RESULT_FILE_BPO> (only kickstart BPO; note the comma).
+Since running BLAST is usually the part that takes the longest in metastudent, this option allows you to re-use the output of a previous run. This is useful to test, for example, different parameters or when you have lost a prediction. The number of kickstart files must correspond to the number of ontologies (see option B<--ontologies>). Separate the file paths with commas. For example: --blast-kickstart-databases=<RESULT_FILE_MFO>,<RESULT_FILE_BPO> (kickstart for both ontologies) or --blast-kickstart-databases=,<RESULT_FILE_BPO> (only kickstart BPO; note the comma).
 
 =item --temp-dir=DIR
 
