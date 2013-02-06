@@ -509,7 +509,7 @@ metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--keep-temp] [--silent] [
 metastudent predicts GO terms for input protein sequences by homology-based inference from already annotated proteins. 
 
 Large (1 GB in total) data files necessary for the operation of metastudent are downloaded automatically on the first use of the program.  The download is restartable.  You can also make an explicit call to
-       F<metastudentdata> (by default /usr/share/metastudent/metastudentdata) to download the data files.  In case the data directory (by default /usr/share/metastudent-data) is not writable and you are not root, the operation is
+       F<metastudentdata> (by default /usr/bin/metastudentdata) to download the data files.  In case the data directory (by default /usr/share/metastudent-data) is not writable and you are not root, the operation is
        reattempted with sudo(8).
 
 =head2 Output format
