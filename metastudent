@@ -174,8 +174,6 @@ def readConfigFile(configMap, configPath):
 				sys.exit(1)
 		if config.has_option('General', "DATABASE_BASE_PATH"):
 			configMap["DATABASE_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_BASE_PATH'))
-			if not os.path.isdir(formatPath(config.get('General', 'DATABASE_BASE_PATH'))):
-				print >> sys.stderr,"Warning: DATABASE_BASE_PATH (%s) does not exist. Will try to download data." % formatPath(config.get('General', 'DATABASE_BASE_PATH'))
 		if config.has_option('General', "FASTA_SPLIT_SIZE"):
 			try:
 				configMap["FASTA_SPLIT_SIZE"]=int(config.get('General', 'FASTA_SPLIT_SIZE'))
@@ -480,6 +478,9 @@ if __name__ == "__main__":
 			os.mkdir(configMap["TMPDIR"])
 		tempfile.tempdir=configMap["TMPDIR"]
 	
+	if not os.path.isdir(configMap.get('DATABASE_BASE_PATH')):
+		print >> sys.stderr,"Warning: DATABASE_BASE_PATH (%s) does not exist. Will try to download data (400MB)." % configMap.get('DATABASE_BASE_PATH')
+	
 	silentString=""
 	if isSilent(): silentString = "--silent"
 	dataCommand = "%s --datadir %s --data-version %s %s " % (os.path.join(metastudentPath, "metastudentdata"), os.path.dirname(configMap["DATABASE_BASE_PATH"]), "1.0.0",silentString)
@@ -505,7 +506,11 @@ metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--keep-temp] [--silent] [
 
 =head1 DESCRIPTION
 
-metastudent predicts GO terms for given amino acid sequences by joining the predictions of various individual classifiers, e.g. based on BLAST
+metastudent predicts GO terms for input protein sequences by homology-based inference from already annotated proteins. 
+
+Large (1 GB in total) data files necessary for the operation of metastudent are downloaded automatically on the first use of the program.  The download is restartable.  You can also make an explicit call to
+       F<metastudentdata> (by default /usr/share/metastudent/metastudentdata) to download the data files.  In case the data directory (by default /usr/share/metastudent-data) is not writable and you are not root, the operation is
+       reattempted with sudo(8).
 
 =head2 Output format
 
@@ -515,7 +520,7 @@ metastudent predicts GO terms for given amino acid sequences by joining the pred
 
 =over
 
-=item Hamp, T. Rost, B. et al (2012). Homology-based inference sets the bar high for protein function prediction.
+=item Hamp, T. Rost, B. et al (2013). Homology-based inference sets the bar high for protein function prediction.
 
 =back
 

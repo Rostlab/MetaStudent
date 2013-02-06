@@ -48,12 +48,13 @@ for path, dirs, files in os.walk(os.path.join(pkgPath, "lib")):
 		for dir in dirs:
 			os.chmod(os.path.join(path, dir),0755)
 		for filename in files:
-			filenameSplit = filename.split(".")
-			if len(filenameSplit) > 2 and "."+filenameSplit[-1] in exeSuffixes:
-				os.chmod(os.path.join(path, filename),0755)
-			else:
-				os.chmod(os.path.join(path, filename),0644)
-			dataFiles.append(os.path.relpath(os.path.join(path, filename), pkgPath))
+			if not filename.endswith(".java"):
+				filenameSplit = filename.split(".")
+				if len(filenameSplit) > 2 and "."+filenameSplit[-1] in exeSuffixes:
+					os.chmod(os.path.join(path, filename),0755)
+				else:
+					os.chmod(os.path.join(path, filename),0644)
+				dataFiles.append(os.path.relpath(os.path.join(path, filename), pkgPath))
 
 metastudentPath=""
 if hasattr(sys, "frozen"):
