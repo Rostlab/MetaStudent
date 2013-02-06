@@ -1,3 +1,10 @@
+metastudent (1.0.6) unstable; urgency=low
+
+  * extended man page
+  * .java files excluded
+
+ -- Tobias Hamp <hampt@rostlab.org>  Fri, 4 Feb 2013 23:26:00 +0200
+
 metastudent (1.0.5) unstable; urgency=low
 
   * split data into separate package
