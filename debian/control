@@ -16,7 +16,8 @@ Description: predictor of gene ontology terms from protein sequence
  .
  It first runs a single BLAST query for all targets against a custom BLAST database.
  This database contains sequences and GO terms of previously annotated proteins. 
- The output is then used by three different base classifiers.
  .
+ The output is then used by three different base classifiers.
  They calculate three separate sets of GO terms. 
+ .
  Finally, a meta classifier converts the three sets into one.
