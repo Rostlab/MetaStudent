@@ -68,6 +68,7 @@ for filei in os.listdir(metastudentPath):
 	else:
 		os.chmod(os.path.join(metastudentPath, filei),0644)
 	
+os.chmod(os.path.join(metastudentPath, "setup.py"),0755);
 
 #metastudentPath=""
 #if hasattr(sys, "frozen"):
