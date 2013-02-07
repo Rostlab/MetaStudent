@@ -1,4 +1,5 @@
-
+#!/usr/bin/perl
+use Carp;
 use Cwd 'abs_path';
 
 if (!$ARGV[0] || !$ARGV[1] || !$ARGV[2]) {die"**Usage: perl CafaWrapper1.pl database targets outputfolder**"};
@@ -16,12 +17,15 @@ while (-e $filename) {
 my @target=split("/",$targets);
 my $targetfile=$target[@target-1];
 
-`perl exercise3.pl $targets $filename -e0.1 -h0.1 -j2 $database`;
+my @cmd = qq|exercise3.pl $targets $filename -e0.1 -h0.1 -j2 $database|;
+system(@cmd) && confess("@cmd failed: ".($?>>8));
 
-my $peterput=`perl treehandler.pl -mfo mfo.obo-xml -bpo bpo.obo-xml -method 2 -pred $filename`;
+@cmd = qq|treehandler.pl -mfo mfo.obo-xml -bpo bpo.obo-xml -method 2 -pred $filename|;
+my $peterput=`@cmd`;
+if($?){ confess("@cmd failed: ".($?>>8)); }
 
 mkdir($outputfolder); 
-open (FH,"> $outputfolder/$targetfile"."_2.out");
+open (FH,">", "$outputfolder/${targetfile}_2.out") || confess("failed to open '> $outputfolder/${targetfile}_2.out': $!");
 print FH $peterput;
 close FH;
 unlink($filename);

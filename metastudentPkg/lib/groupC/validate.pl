@@ -1,4 +1,5 @@
-
+#!/usr/bin/perl
+use Carp;
 use Archive::Extract;
 $test=$ARGV[0];
 $train=$ARGV[1];
@@ -72,5 +73,6 @@ foreach $line (@cat) {
     print $fhout $line;
     }
 close $fhout;
-`perl /mnt/opt/data/pp2_exercise/groups/groupC/CafaWrapper3.pl $train $outfile $outfolder`;
+my @cmd = qq|/mnt/opt/data/pp2_exercise/groups/groupC/CafaWrapper3.pl $train $outfile $outfolder|;
+system(@cmd) && confess("@cmd failed: ".($?>>8));
 #unlink($outfile);

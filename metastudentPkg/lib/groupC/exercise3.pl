@@ -1,4 +1,5 @@
-
+#!/usr/bin/perl
+use Carp;
 if (!$ARGV[0] || !$ARGV[1]) {die"**Usage: perl exercise3.pl [inputfile] [outputfile]\nperl exercise3.pl [inputfile] [outputfile] [optional: -e0.1] [optional: -h0.1] [optional: -j2] [optional: databasefile]\nthe above examples are the current default values, default database is the sprot_go_80 from exercise 2\n"}
 my $input=$ARGV[0];
 my $output=$ARGV[1];
@@ -38,7 +39,9 @@ open($fhin,$input)|| die"** could not open input-file $input\n";
 @blastoutput=<$fhin>;
 close $fhin;
 if (isfasta(@blastoutput)){print "Now running blast\n";
-@blastoutput=`blastpgp -i $input -d $database $e $h $j`; #Systemaufruf f�r blastpgp
+my @cmd = qq|blastpgp -i $input -d $database $e $h $j|;
+@blastoutput=`@cmd`; #Systemaufruf f�r blastpgp
+if($?){ confess("@cmd failed: ".($?>>8)); }
 print "... done\n";
 }
 foreach (@blastoutput) { 
