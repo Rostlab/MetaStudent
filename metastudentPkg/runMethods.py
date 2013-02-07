@@ -187,7 +187,7 @@ def runMethodB(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_B_K, onto, conf
 	os.mkdir(outputFilePath)
 	commandsi = ["mkdir -p " + tmpDirPath, 
 	   			"cd " + configMap["GROUP_B_PATH"],
-				"perl knn_weighted -m weighted_knn -j %s -d %s -i %s -o %s -k %s" % (blastOutputFilePath, blastOutputFilePath, fastaFilePath, outputFilePath, GROUP_B_K)]
+				"./knn_weighted -m weighted_knn -j %s -d %s -i %s -o %s -k %s" % (blastOutputFilePath, blastOutputFilePath, fastaFilePath, outputFilePath, GROUP_B_K)]
 	commandString = ";".join(commandsi)
 	#print commandString
 	os.chdir(currCwd)
@@ -228,7 +228,7 @@ def runMethodB(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_B_K, onto, conf
 					predFilesContent.append(line)
 	return predFilesContent
 
-def runMethodC(blastOutputFilePath, fastaFilePath, tmpDir, scoring, onto, configMap):#
+def runMethodC(blastOutputFilePath, fastaFilePath, tmpDir, scoring, onto, configMap, debug):#
 	p("Running Method C")
 	
 	currCwd = os.getcwd()
@@ -237,9 +237,10 @@ def runMethodC(blastOutputFilePath, fastaFilePath, tmpDir, scoring, onto, config
 	outputFilePath = os.path.join(tmpDirPath, "output.%s.txt" % (onto))
 	commandsi = ["mkdir -p " + tmpDirPath, 
 	   			"cd " + configMap["GROUP_C_PATH"],
-				"perl CafaWrapper3.pl %s %s %s %s" % (blastOutputFilePath, outputFilePath, scoring, tmpDirPath)]
+				"./CafaWrapper3.pl %s %s %s %s" % (blastOutputFilePath, outputFilePath, scoring, tmpDirPath)]
 	commandString = ";".join(commandsi)
-	#print commandString
+	if debug:
+		print >> sys.stderr, commandString
 	os.chdir(currCwd)
 
 	logFile=None

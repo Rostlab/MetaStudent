@@ -1,4 +1,4 @@
-
+#!/usr/bin/perl
 # AUTHOR: Peter Hoenigschmid
 
 use strict;

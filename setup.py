@@ -33,6 +33,7 @@ if childP.poll() != 0:
 pkgPath=getPkgPath()
 dataFiles=[]
 exeSuffixes=set([".rb",".py",".pl",".sh",".class",".jar",".exe"])
+executables=set(["CafaWrapper3.pl","exercise3.pl","knn_weighted","treehandler.pl"])
 #for path, dirs, files in os.walk(os.path.join(pkgPath, "data")):
 #	if "/.svn" not in path and "dataset_01_2010" not in path:
 #		for filename in files:
@@ -55,6 +56,8 @@ for path, dirs, files in os.walk(os.path.join(pkgPath, "lib")):
 				else:
 					os.chmod(os.path.join(path, filename),0644)
 				dataFiles.append(os.path.relpath(os.path.join(path, filename), pkgPath))
+			if filename in executables:
+				os.chmod(os.path.join(path, filename),0755)
 
 metastudentPath=""
 if hasattr(sys, "frozen"):
@@ -68,6 +71,8 @@ for filei in os.listdir(metastudentPath):
 	else:
 		os.chmod(os.path.join(metastudentPath, filei),0644)
 	
+os.chmod(os.path.join(metastudentPath, "metastudent"),0755);
+os.chmod(os.path.join(metastudentPath, "metastudentdata"),0755);
 os.chmod(os.path.join(metastudentPath, "setup.py"),0755);
 
 #metastudentPath=""

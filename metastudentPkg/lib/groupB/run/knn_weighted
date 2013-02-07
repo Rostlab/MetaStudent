@@ -1,6 +1,6 @@
-
-
+#!/usr/bin/perl
 use strict;
+use Carp;
 use Cwd;
 use Getopt::Std;
 use File::Basename;
@@ -130,13 +130,15 @@ my $outfile_path = $output_folder . ( substr($output_folder, length($output_fold
 if($jumpstart eq "") 
 { 
 	print "-> running BLAST...\n";
-	print `blastpgp -i $targets -d $blastdb -e $e -h $t -j $x > $outfile_path.blastresults`; 
+	my @cmd = qq|blastpgp -i $targets -d $blastdb -e $e -h $t -j $x > $outfile_path.blastresults|; 
+	print `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 	# convert to tabular input format
 	#`ruby ../ruby/blast_file_parser_concatfiles.rb $outfile_path.blastresults > $outfile_path.tabularresults`;
 	{
 	  local $CWD;
 	  $CWD[-1] = 'java';
-	  `java BlastFileParser $jumpstart $outfile_path.tabularresults`;
+	  my @cmd = qq|java BlastFileParser $jumpstart $outfile_path.tabularresults|;
+	  `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 	}
 } 
 else 
@@ -148,7 +150,8 @@ else
 	  $CWD[-1] = 'java';
 	  #print "@CWD\n";
 	  print "java -jar BlastFileP.jar BlastFileParser $jumpstart $outfile_path.tabularresults\n";
-	  `java -jar BlastFileP.jar BlastFileParser $jumpstart $outfile_path.tabularresults`;
+	  my @cmd = qq|java -jar BlastFileP.jar BlastFileParser $jumpstart $outfile_path.tabularresults|;
+	  `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 	}
 }
 
@@ -209,7 +212,8 @@ if($do_evaluation)
 	}
 
 	# run evaluation
-	my $eval_out = `cd ../perl; cat $outfile_path.raw.leaves | perl evaluate.pl -g ../data/goterm.txt -t ../data/goterm2term.txt -i -n 1 -p x $honest`;
+	my @cmd = qq(cd ../perl; cat $outfile_path.raw.leaves | perl evaluate.pl -g ../data/goterm.txt -t ../data/goterm2term.txt -i -n 1 -p x $honest);
+	my $eval_out = `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 	
 	my @lines = split(/\n/, $eval_out);
 	shift @lines;
@@ -225,7 +229,9 @@ if($do_evaluation)
 
 print "-> converting to CAFA output...\n";
 print "$CWD\n";
-print `cd ..; java -jar pp2Parser.jar pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_leaves -c $scorecolumn -pr $precision -rc $recall`;
+my @cmd = qq|cd ..; java -jar pp2Parser.jar pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_leaves -c $scorecolumn -pr $precision -rc $recall|;
+
+print `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 #print `java -classpath '.' pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_allnodes -c $scorecolumn -pr $precision -rc $recall -gc $closure -gn $goterms`;
 
 print "-> output written to $outfile_path.predicted_leaves and\n                     $outfile_path.predicted_allnodes\n";

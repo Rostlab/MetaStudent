@@ -1,0 +1,10 @@
+metastudent (1.0.7) UNRELEASED; urgency=low
+
+  * Removed perl module convenience copies.
+  * Added many safety checks for script calls.
+  * DEP5 compliant d/copyright.
+  * Bumped standards-Version to 3.9.4.
+  * Added ChangeLog, working towards a separated Debianization.
+
+ -- Laszlo Kajan <lkajan@debian.org>  Thu, 07 Feb 2013 19:08:33 +0100
+

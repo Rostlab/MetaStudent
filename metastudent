@@ -22,13 +22,14 @@ from metastudentPkg.Logger import Logger
 import commands
 import metastudentPkg
 
+VERSION="1.0.7"
 configMap=None
 metastudentPath=""
 metastudentPkgPath=""
 dataPkgPath=""
 
 def usage():
-	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--kickstart-dir=<WORKDIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
+	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--kickstart-dir=<WORKDIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
 
 
 
@@ -61,7 +62,7 @@ def metaPredict(preds, onto):
 				predLines.append( prot + "\t" + term + "\t%.2f" % metaScore )
 	return predLines	
 	
-def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds):
+def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug):
 	predLinesA = []
 	predLinesB = []
 	predLinesC = []
@@ -94,7 +95,7 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 			if not blastOnly:
 				predLinesA = runMethodA(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_A_THRESHOLD_%s" % (ontology)], configMap["GROUP_A_K_%s" % (ontology) ], configMap["BLAST_ITERS_%s" % (ontology)], ontology, configMap)
 				predLinesB = runMethodB(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_B_K_%s" % (ontology) ], ontology, configMap)
-				predLinesC = runMethodC(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_C_SCORING_%s" % (ontology) ], ontology, configMap)
+				predLinesC = runMethodC(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_C_SCORING_%s" % (ontology) ], ontology, configMap, debug)
 				
 				if allPreds:
 					methodOutputFileA = open(outputFilePath+".%s.%s.txt" % (ontology, "A"),'w')
@@ -363,12 +364,13 @@ if __name__ == "__main__":
 
 
 	try:
-		opts, args=getopt(sys.argv[1:], "hi:o:", ["help", "silent", "keep-temp", "temp-dir=", "version", "config=", "output-blast", "blast-kickstart-databases=", "ontologies=","blast-only","all-predictions"])
+		opts, args=getopt(sys.argv[1:], "hi:o:", ["debug", "help", "silent", "keep-temp", "temp-dir=", "version", "config=", "output-blast", "blast-kickstart-databases=", "ontologies=","blast-only","all-predictions"])
 	except GetoptError, err:
 		print >> sys.stderr, str(err)
 		usage()
 		sys.exit(1)
 	
+	debug=False
 	inputFastaFilePath=""
 	outputFilePath=""
 	tempDirPath=""
@@ -384,7 +386,7 @@ if __name__ == "__main__":
 	
 	optArgs = [arg[0] for arg in opts]
 	if "--version" in optArgs:
-		print "1.0"
+		print VERSION
 		sys.exit(0)
 	if ("-i" not in optArgs and "--kickstart-dir" not in optArgs) or "-o" not in optArgs:
 		usage()
@@ -435,6 +437,8 @@ if __name__ == "__main__":
 				blastKickstartDatabasePaths.append(dbAbs)
 			p(blastKickstartDatabasePathsTmp)
 			p(blastKickstartDatabasePaths)
+		elif o == "--debug":
+			debug = True;
 		elif o in ("-h", "--help"):
 			usage()
 			sys.exit()
@@ -489,7 +493,7 @@ if __name__ == "__main__":
 		print >> sys.stderr,"Failed to call %s:\nFull output:\n%s" % (dataCommand, o)
 		sys.exit(1);
 	
-	runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds)
+	runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug)
 	
 
 """
@@ -535,6 +539,10 @@ The input fasta file. Please try to remove any special formattings (e.g. whitesp
 =item -o RESULT_FILE_PREFIX
 
 The file name prefix of the output files. GO terms are organized in ontologies. Metatstudent treats each ontology differently and outputs one result file for each. For example, if <RESULT_FILE>=./myresult and MFO and BPO ontologies are selected (see option B<--ontologies>), then metastudent creates two output files: ./myresult.MFO.txt and ./myresult.BPO.txt
+
+=item --debug
+
+Print extra debugging messages.
 
 =item --keep-temp
 
