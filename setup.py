@@ -106,7 +106,7 @@ setup (name = 'metastudent',
        keywords = ["GO","term","prediction","BLAST","ontology","protein","sequence"],
        scripts = ["metastudent", "metastudentdata"],
        data_files =[	("share/metastudent", ["metastudentrc.default"]),
-			("share/doc/metastudent/examples", ["test.fasta"]),
+			("share/doc/metastudent/examples", ["test.fasta","test.result.BPO.txt","test.result.MFO.txt"]),
 			("share/man/man1", ["metastudent.1","metastudentdata.1"])
 		   ],
        packages = ['metastudentPkg'],
