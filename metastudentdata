@@ -1,12 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import traceback
-import os
-from getopt import getopt, GetoptError
-import sys
-import commands
-import shutil
-from subprocess import call
 
 # metastudent - Predict GO terms from sequence
 #
@@ -14,6 +7,13 @@ from subprocess import call
 #
 # Copyright (c) 2012-2013 Tobias Hamp <hampt@rostlab.org>
 
+import traceback
+import os
+from getopt import getopt, GetoptError
+import sys
+import commands
+import shutil
+from subprocess import call
 
 def usage():
 	return "metastudentdata [--datadir=] [--data-version=] [--help] [--silent] [--version] [--keep-data-tar] [--remote-ftp-dir=] [--remote-filesys-dir=]"
