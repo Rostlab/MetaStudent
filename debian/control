@@ -3,9 +3,10 @@ Section: science
 Priority: optional
 Maintainer: Tobias Hamp <hampt@rostlab.org>
 Uploaders: Laszlo Kajan <lkajan@debian.org>
-Build-Depends: debhelper (>=8~), python-support (>= 0.6), cdbs (>= 0.4.49), python (>= 2.6)
+Build-Depends: debhelper (>=8~), python-support (>= 0.6), cdbs (>= 0.4.49), python (>= 2.6), javahelper (>=0.25)
+Build-Depends-Indep: default-jdk, default-jdk-doc
 XS-Python-Version: >= 2.6
-Standards-Version: 3.9.4
+Standards-Version: 3.9.1
 
 Package: metastudent
 Architecture: all
@@ -14,7 +15,7 @@ Depends: ${misc:Depends}, ${perl:Depends}, ${python:Depends}, python (>= 2.6), b
 Description: predictor of gene ontology terms from protein sequence
  Metastudent predicts gene ontology (GO) terms for protein sequences 
  through homology. It first runs a single BLAST query for all targets
- against a custom BLAST database.This database contains sequences and 
+ against a custom BLAST database. This database contains sequences and 
  GO terms of previously annotated proteins.
  .
  The output is then used by three different base classifiers. They 

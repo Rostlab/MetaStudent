@@ -128,7 +128,7 @@ def runMethodA(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_A_THRESHOLD, GR
 	outputFilePath = os.path.join(tmpDirPath, "output.%s.cafa.txt" % (onto))
 	commandsi = ["mkdir -p " + tmpDirPath, 
 	   			"cd " + configMap["GROUP_A_PATH"],
-				"java -jar GOSSIP.jar %s %s %s %s %s %s" % (fastaFilePath, blastOutputFilePath, outputFilePath, GROUP_A_THRESHOLD, GROUP_A_K, iters)]
+				"java -cp gossip.jar GOSSIPSTarter %s %s %s %s %s %s" % (fastaFilePath, blastOutputFilePath, outputFilePath, GROUP_A_THRESHOLD, GROUP_A_K, iters)]
 	commandString = ";".join(commandsi)
 	#print commandString
 

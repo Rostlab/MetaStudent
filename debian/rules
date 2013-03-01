@@ -2,5 +2,13 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+JAVA_HOME=/usr/lib/jvm/default-java
+
 %:
-	dh $@ --parallel
+	dh $@ --with javahelper
+
+override_dh_auto_install:
+	dh_auto_install
+	find . -regex ".*/knn_weighted\|.*/CafaWrapper1\.pl\|.*/CafaWrapper2\.pl\|.*/CafaWrapper3\.pl\|.*/CafaWrapper3_new\.pl\|.*/exercise3\.pl\|.*/treehandler\.pl\|.*/validate\.pl" -exec chmod +x {} \;
+
+#	chmod +x tmp/usr/s

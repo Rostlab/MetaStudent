@@ -198,7 +198,7 @@ public class GenerateCAFAOutput {
 		String[] keywords = null;
 		int confCol = -1;
 		
-		for(int i=1; i<args.length; i+=2) {
+		for(int i=0; i<args.length; i+=2) {
 			if(args[i].equals("-i")) {
 				inputfile = args[i+1];
 			} else if(args[i].equals("-o")) {

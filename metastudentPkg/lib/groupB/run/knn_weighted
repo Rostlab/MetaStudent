@@ -149,8 +149,8 @@ else
 	  local $CWD;
 	  $CWD[-1] = 'java';
 	  #print "@CWD\n";
-	  print "java -jar BlastFileP.jar BlastFileParser $jumpstart $outfile_path.tabularresults\n";
-	  my @cmd = qq|java -jar BlastFileP.jar BlastFileParser $jumpstart $outfile_path.tabularresults|;
+	  print "java -cp blastfilep.jar BlastFileParser $jumpstart $outfile_path.tabularresults\n";
+	  my @cmd = qq|java -cp blastfilep.jar BlastFileParser BlastFileParser $jumpstart $outfile_path.tabularresults|;
 	  `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 	}
 }
@@ -162,7 +162,7 @@ print "-> predicting GO-Terms...\n";
 
 my $cc_skipped = 0;
 print "$CWD\n";
-my $cmdline = "cd ..; java -jar pp2.jar pp2.prediction.knn.KNNPredictor -i $outfile_path.tabularresults -o $outfile_path.raw -k $k -d $distribution -c $closure -t $goterms";
+my $cmdline = "cd ..; java -cp pp2.jar pp2.prediction.knn.KNNPredictor -i $outfile_path.tabularresults -o $outfile_path.raw -k $k -d $distribution -c $closure -t $goterms";
 my $pid = open3(0, \*OUT, 0, $cmdline) or die("Could not fork: $!");
                         
 while(my $line = <OUT>) {
@@ -229,7 +229,7 @@ if($do_evaluation)
 
 print "-> converting to CAFA output...\n";
 print "$CWD\n";
-my @cmd = qq|cd ..; java -jar pp2Parser.jar pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_leaves -c $scorecolumn -pr $precision -rc $recall|;
+my @cmd = qq|cd ..; java -cp pp2.jar pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_leaves -c $scorecolumn -pr $precision -rc $recall|;
 
 print `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 #print `java -classpath '.' pp2.datahandler.GenerateCAFAOutput -m 1 -i $outfile_path.raw.leaves -o $outfile_path.predicted_allnodes -c $scorecolumn -pr $precision -rc $recall -gc $closure -gn $goterms`;
