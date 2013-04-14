@@ -11,7 +11,7 @@ Standards-Version: 3.9.1
 Package: metastudent
 Architecture: all
 Homepage: http://www.rostlab.org
-Depends: ${misc:Depends}, ${perl:Depends}, ${python:Depends}, python (>= 2.6), blast2, default-jre, libgo-perl, libipc-run-perl, perl
+Depends: ${misc:Depends}, ${perl:Depends}, ${python:Depends}, python (>= 2.6), blast2, default-jre, libgo-perl, libipc-run-perl, libgraphviz-perl, perl
 Description: predictor of gene ontology terms from protein sequence
  Metastudent predicts gene ontology (GO) terms for protein sequences 
  through homology. It first runs a single BLAST query for all targets
