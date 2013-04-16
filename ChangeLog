@@ -1,10 +1,58 @@
 metastudent (1.0.7) UNRELEASED; urgency=low
 
-  * Removed perl module convenience copies.
+  * Removed Perl module convenience copies.
   * Added many safety checks for script calls.
   * DEP5 compliant d/copyright.
   * Bumped standards-Version to 3.9.4.
   * Added ChangeLog, working towards a separated Debianization.
+  * Removed all .jar files from repository.
+  * Removed all .java files from repository.
+  * Package now builds entirely from source.
 
  -- Laszlo Kajan <lkajan@debian.org>  Thu, 07 Feb 2013 19:08:33 +0100
 
+metastudent (1.0.6) unstable; urgency=low
+
+  * extended man page
+  * .java files excluded
+
+ -- Tobias Hamp <hampt@rostlab.org>  Fri, 4 Feb 2013 23:26:00 +0200
+
+metastudent (1.0.5) unstable; urgency=low
+
+  * split data into separate package
+
+ -- Tobias Hamp <hampt@rostlab.org>  Fri, 18 Jan 2013 23:26:00 +0200
+
+metastudent (1.0.4) unstable; urgency=low
+
+  * fixed bug with sequence identifier
+
+ -- Tobias Hamp <hampt@rostlab.org>  Fri, 20 July 2012 23:26:00 +0200
+
+metastudent (1.0.3) unstable; urgency=low
+
+  * man page changed
+  * improved error handling
+  * tmp dir default path changed
+  * new option: silent mode
+
+ -- Tobias Hamp <hampt@rostlab.org>  Fri, 6 July 2012 20:39:00 +0200
+
+metastudent (1.0.2) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Laszlo Kajan <lkajan@rostlab.org>  Fri, 06 Jul 2012 16:48:21 +0200
+
+metastudent (1.0.1) unstable; urgency=low
+
+  * Faster method C
+
+ -- Tobias Hamp <hampt@rostlab.org>  Tue, 3 July 2012 22:41:00 +0200
+
+metastudent (1.0.0) unstable; urgency=low
+
+  * Initial release
+
+ -- Tobias Hamp <hampt@rostlab.org>  Mon, 18 March 2012 02:18:05 +0200

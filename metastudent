@@ -521,7 +521,8 @@ metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--keep-temp] [--silent] [
 
 =head1 DESCRIPTION
 
-metastudent predicts GO terms for input protein sequences by homology-based inference from already annotated proteins. 
+Metastudent predicts Gene Ontology (GO) terms from the Molecular Function Ontology (MFO) and Biological Process Ontology (BPO)
+for input protein sequences by homology-based inference from already annotated proteins.
 
 Large (1 GB in total) data files necessary for the operation of metastudent are downloaded automatically on the first use of the program.  The download is restartable.  You can also make an explicit call to
        F<metastudentdata> (by default /usr/bin/metastudentdata) to download the data files.  In case the data directory (by default /usr/share/metastudent-data) is not writable and you are not root, the operation is
@@ -530,6 +531,8 @@ Large (1 GB in total) data files necessary for the operation of metastudent are 
 =head2 Output format
 
 <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
+
+One output file is produced for each ontology used. See more under option B<-o>.
 
 =head1 REFERENCES
 
@@ -549,7 +552,7 @@ The input fasta file. Please try to remove any special formattings (e.g. whitesp
 
 =item -o RESULT_FILE_PREFIX
 
-The file name prefix of the output files. GO terms are organized in ontologies. Metatstudent treats each ontology differently and outputs one result file for each. For example, if <RESULT_FILE>=./myresult and MFO and BPO ontologies are selected (see option B<--ontologies>), then metastudent creates two output files: ./myresult.MFO.txt and ./myresult.BPO.txt
+The file name prefix of the output files. GO terms are organized in ontologies. Metatstudent treats each ontology differently and outputs one result file for each. For example, if <RESULT_FILE>=./myresult and MFO and BPO ontologies are selected (see option B<--ontologies>), then metastudent creates two output files: F<./myresult.MFO.txt> and F<./myresult.BPO.txt>.
 
 =item --debug
 

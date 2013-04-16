@@ -12,9 +12,10 @@ Architecture: all
 Homepage: http://www.rostlab.org
 Depends: ${misc:Depends}, ${perl:Depends}, ${python:Depends}, python (>= 2.6), blast2, default-jre, libgo-perl, libipc-run-perl, libgraphviz-perl, perl
 Description: predictor of Gene Ontology terms from protein sequence
- Often, only the sequence of a protein is unknown, but 
+ Often, only the sequence of a protein is known, but 
  not its functions. Metastudent will try to predict 
- missing annotations through homology searches (BLAST). 
+ missing functional annotations through homology searches (BLAST).
  .
  All predicted functions correspond to Gene Ontology (GO) 
- terms and are associated with a reliability score.
+ terms from the Molecular Function Ontology (MFO) and the Biological Process
+ Ontology (BPO) and are associated with a reliability score.
