@@ -12,9 +12,6 @@ import java.util.Scanner;
 public class GOSSIPSTarter
 {
 
-	/**
-	 * @param args
-	 */
 	
 	public static List<String> indivdResults = new ArrayList<String>();
 	public static List<String[]> fastaEntries = new ArrayList<String[]>();

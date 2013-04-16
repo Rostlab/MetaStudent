@@ -104,7 +104,7 @@ public class GenerateCAFAOutput {
 	 * @param model Number of model (1-3)
 	 * @param pr Precision of method
 	 * @param rc Recall of method
-	 * @param n Parameter n = Number of Predictions per target
+	 * @param k Parameter n = Number of Predictions per target
 	 */
 	public static void parseToCAFAOutput(String inputFile, String outputFile,
 			int model, double pr, double rc, int k) {

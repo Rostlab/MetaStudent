@@ -32,11 +32,9 @@ public class kNearestNeighbor {
 	 * 
 	 * @param blastHits file like "go_test_output". must already contain fully added GO paths!
 	 * @param scoringMethod determines type of sequence weighting, specified by one of the constants EVAL_*
-	 * @param scoringLambda constant by which EVAL_LOG scores are multiplied in the end
 	 * @param useEValueThreshold determines whether conventional kNN or a fixed E-Value threshold is used to include BLAST hits
 	 * @param eValueThreshold if useEvalueThreshold == true, then all hits with an E-Value below this parameter are included
 	 * @param k if conventional kNN is used, this determines the fixed number of neighbors to use, if there are enough
-	 * @return
 	 */
 	public ArrayList<GoNode> predictFunction(BlastResultList blastHits, int scoringMethod, boolean useEValueThreshold, float eValueThreshold, int k)
 	{
