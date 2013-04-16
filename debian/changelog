@@ -1,3 +1,9 @@
+metastudent (1.0.8) UNRELEASED; urgency=low
+
+  * Increased package quality.
+
+ -- Tobias Hamp <hampt@rostlab.org>  Thu, 15 Aprl 2013 12:07:13 +0100
+
 metastudent (1.0.7) UNRELEASED; urgency=low
 
   * New upstream release.
