@@ -538,7 +538,7 @@ One output file is produced for each ontology used. See more under option B<-o>.
 
 =over
 
-=item Hamp, T. Rost, B. et al (2013). Homology-based inference sets the bar high for protein function prediction.
+=item Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013). Homology-based inference sets the bar high for protein function prediction. BMC Bioinformatics, 14(Suppl 3), S7.
 
 =back
 
