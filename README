@@ -2,8 +2,11 @@ metastudent 1.0
 
 Metastudent predicts GO terms for given amino acid sequences by joining the predictions of various individual classifiers, e.g. based on BLAST
 
+Notes
+=====
+This package depends on the Debian build infrastructure for building. It does not have another build system. For this reason both ChangeLog and debian/changelog have to be maintained in reasonable condition, remembering that /no/ files from the debian/ directory in this repository make it into the Debian package. This is because the debian directory of the upstream archive generated from this repository is discarded when the archive (orig.tar.gz) is combined with the Debianization (currently on alioth.debian.org).
+
 How to generate distributable tar archive
 =========================================
-This package depends on the Debian build infrastructure for building. It does not have another build system:
  * debuild -S -us
 This generates the ../metastudent_[0-9.]+.tar.gz archive.
