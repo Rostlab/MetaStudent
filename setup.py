@@ -21,15 +21,6 @@ if childP.poll() != 0:
 	sys.exit(1)
 	
 	
-print 'Creating man page metastudentdata.1...'
-childP = Popen(["pod2man", "-c", "'User Commands'", "-r",  "'%s'",  "-name", "METASTUDENTDATA",  "metastudentdata",  "metastudentdata.1"], stdout=PIPE, stderr=PIPE)
-stdout, stderr = childP.communicate()
-if childP.poll() != 0:
-	print >> sys.stderr, "Error: pod2man failed"
-	print >> sys.stderr, "Stdout: %s" % (stdout)
-	print >> sys.stderr, "Stderr: %s" % (stderr)
-	sys.exit(1)
-
 pkgPath=getPkgPath()
 dataFiles=[]
 exeSuffixes=set([".rb",".py",".pl",".sh",".class",".jar",".exe"])
@@ -72,7 +63,6 @@ for filei in os.listdir(metastudentPath):
 		os.chmod(os.path.join(metastudentPath, filei),0644)
 	
 os.chmod(os.path.join(metastudentPath, "metastudent"),0755);
-os.chmod(os.path.join(metastudentPath, "metastudentdata"),0755);
 os.chmod(os.path.join(metastudentPath, "setup.py"),0755);
 
 #metastudentPath=""
@@ -104,10 +94,10 @@ setup (name = 'metastudent',
        url = "www.rostlab.org",
        license = "GPL",
        keywords = ["GO","term","prediction","BLAST","ontology","protein","sequence"],
-       scripts = ["metastudent", "metastudentdata"],
+       scripts = ["metastudent"],
        data_files =[	("share/metastudent", ["metastudentrc.default"]),
 			("share/doc/metastudent/examples", ["test.fasta","test.result.BPO.txt","test.result.MFO.txt"]),
-			("share/man/man1", ["metastudent.1","metastudentdata.1"])
+			("share/man/man1", ["metastudent.1"])
 		   ],
        packages = ['metastudentPkg'],
        package_data={'metastudentPkg': dataFiles}
