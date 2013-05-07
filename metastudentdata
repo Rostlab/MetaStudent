@@ -24,7 +24,7 @@ if __name__ == "__main__":
 	silent = False
 	currentPath = os.getcwd()
 	pkg_data_ver = None
-	argDataVer="1.0.0"
+	argDataVer="201012"
 	argDataDir="/usr/share/metastudent-data"
 	remoteFtpDir = "ftp://rostlab.org/metastudent"
 	remoteFilesysDir = None

@@ -1,6 +1,8 @@
 metastudent (1.0.8) UNRELEASED; urgency=low
 
-  * Arch dep BLAST databases are now read from /usr/lib/metastudent-data.
+  * Removed automatic database download logic as it is not needed by the
+    Debian package, since we now package databases. Also, the database
+    package no longer contains the formatdb'd BLAST database.
 
  -- Laszlo Kajan <lkajan@rostlab.org>  Wed, 17 Apr 2013 15:44:34 +0200
 

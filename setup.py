@@ -35,7 +35,7 @@ dataFiles=[]
 exeSuffixes=set([".rb",".py",".pl",".sh",".class",".jar",".exe"])
 executables=set(["CafaWrapper3.pl","exercise3.pl","knn_weighted","treehandler.pl"])
 #for path, dirs, files in os.walk(os.path.join(pkgPath, "data")):
-#	if "/.svn" not in path and "dataset_01_2010" not in path:
+#	if "/.svn" not in path and "dataset_201012" not in path:
 #		for filename in files:
 #			filenameSplit = filename.split(".")
 #			if len(filenameSplit) > 2 and "."+filenameSplit[-1] in exeSuffixes:

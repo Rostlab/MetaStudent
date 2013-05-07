@@ -1,6 +1,7 @@
 metastudent (1.0.8) UNRELEASED; urgency=low
 
-  * 
+  * Debianization moved to [1].
+    [1] svn+ssh://lkajan@svn.debian.org/svn/debian-med/trunk/packages/metastudent
 
  -- Laszlo Kajan <lkajan@rostlab.org>  Wed, 17 Apr 2013 15:44:12 +0200
 

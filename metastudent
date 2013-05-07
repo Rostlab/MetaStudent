@@ -494,14 +494,7 @@ if __name__ == "__main__":
 		tempfile.tempdir=configMap["TMPDIR"]
 	
 	if not os.path.isdir(configMap.get('DATABASE_BASE_PATH')):
-		print >> sys.stderr,"Warning: DATABASE_BASE_PATH (%s) does not exist. Will try to download data (400MB)." % configMap.get('DATABASE_BASE_PATH')
-	
-	silentString=""
-	if isSilent(): silentString = "--silent"
-	dataCommand = "%s --datadir %s --data-version %s %s " % (os.path.join(metastudentPath, "metastudentdata"), os.path.dirname(configMap["DATABASE_BASE_PATH"]), "1.0.0",silentString)
-	s, o = commands.getstatusoutput(dataCommand)
-	if s != 0:
-		print >> sys.stderr,"Failed to call %s:\nFull output:\n%s" % (dataCommand, o)
+		print >> sys.stderr,"Error: DATABASE_BASE_PATH (%s) does not exist." % configMap.get('DATABASE_BASE_PATH')
 		sys.exit(1);
 	
 	runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug)

@@ -1,7 +1,7 @@
 [General]
 MYNAME=metastudent
 TMPDIR=/tmp/
-DATABASE_BASE_PATH=<default-data-package-path>/dataset_12_2010
+DATABASE_BASE_PATH=<default-data-package-path>/dataset_201012
 BLASTPGP_EXE_PATH=/usr/bin/blastpgp
 FASTA_SPLIT_SIZE=10
 GROUP_A_PATH=<python-package-path>/lib/groupA/GOSSIP
