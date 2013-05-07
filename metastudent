@@ -40,7 +40,7 @@ metastudentPkgPath=""
 dataPkgPath=""
 
 def usage():
-	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--kickstart-dir=<WORKDIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
+	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
 
 
 
@@ -399,7 +399,7 @@ if __name__ == "__main__":
 	if "--version" in optArgs:
 		print VERSION
 		sys.exit(0)
-	if ("-i" not in optArgs and "--kickstart-dir" not in optArgs) or "-o" not in optArgs:
+	if ("-i" not in optArgs and "--blast-kickstart-databases" not in optArgs) or "-o" not in optArgs:
 		usage()
 		sys.exit(1)
 	
@@ -509,7 +509,7 @@ metastudent - predictor of gene ontology terms from protein sequence
 
 =head1 SYNOPSIS
 
-metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--keep-temp] [--silent] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=I<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=I<BLAST_RESULT_FILE(S)>] [--temp-dir=I<DIR>] [--kickstart-dir=I<WORKDIR>] [--config=I<CONFIG_FILE>]
+metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--debug] [--keep-temp] [--silent] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=I<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=I<BLAST_RESULT_FILE(S)>] [--temp-dir=I<DIR>] [--config=I<CONFIG_FILE>]
 !!! Make sure your fasta file contains at most 500 sequences !!!
 
 =head1 DESCRIPTION
@@ -523,9 +523,9 @@ Large (1 GB in total) data files necessary for the operation of metastudent are 
 
 =head2 Output format
 
+For each selected ontology (see I<--ontologies>), one output file is produced (see I<-o>).
+Each line in each file associates a protein with a GO term and a reliability f the association (0.0 to 1.0). The following format is used:
 <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
-
-One output file is produced for each ontology used. See more under option B<-o>.
 
 =head1 REFERENCES
 
@@ -545,7 +545,7 @@ The input fasta file. Please try to remove any special formattings (e.g. whitesp
 
 =item -o RESULT_FILE_PREFIX
 
-The file name prefix of the output files. GO terms are organized in ontologies. Metatstudent treats each ontology differently and outputs one result file for each. For example, if <RESULT_FILE>=./myresult and MFO and BPO ontologies are selected (see option B<--ontologies>), then metastudent creates two output files: F<./myresult.MFO.txt> and F<./myresult.BPO.txt>.
+The file name prefix of the output files. GO terms are organized in ontologies. Metatstudent treats each ontology differently and outputs one result file for each. For example, if <RESULT_FILE>=./myresult and MFO (Molecular Function Ontology) and BPO (Biological Process Ontology) ontologies are selected (see option B<--ontologies>), then metastudent creates two output files: F<./myresult.MFO.txt> and F<./myresult.BPO.txt>.
 
 =item --debug
 
