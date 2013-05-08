@@ -8,5 +8,5 @@ This package depends on the Debian build infrastructure for building. It does no
 
 How to generate the distributable tar archive
 =========================================
- * debuild -S -us
+ * debuild -S -us -uc
 This generates the ../metastudent_[0-9.]+.tar.gz archive.
