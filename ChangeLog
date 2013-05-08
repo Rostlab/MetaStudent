@@ -1,8 +1,9 @@
-metastudent (1.0.8) UNRELEASED; urgency=low
+metastudent (1.0.8) unstable; urgency=low
 
   * Removed automatic database download logic as it is not needed by the
     Debian package, since we now package databases. Also, the database
-    package no longer contains the formatdb'd BLAST database.
+    package no longer contains the formatdb'd BLAST database, but the
+    source fasta files.
 
  -- Laszlo Kajan <lkajan@rostlab.org>  Wed, 17 Apr 2013 15:44:34 +0200
 
