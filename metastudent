@@ -145,7 +145,7 @@ def metaPredict(preds, onto, noNames):
 				else:
 					predLines.append( prot + "\t" + term + "\t%.2f" % metaScore )
 	
-	predLines = sorted(predLines, key=lambda x: float(x.split("\t")[2]), reverse=True)
+	predLines = sorted(predLines, key=lambda x: x.split("\t")[0] + str(1-float(x.split("\t")[2])))
 	
 	return predLines	
 	
