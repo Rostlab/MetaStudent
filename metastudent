@@ -33,6 +33,7 @@ from metastudentPkg.Logger import Logger
 import commands
 import metastudentPkg
 from metastudentPkg.version import VERSION
+import urllib2
 
 configMap=None
 metastudentPath=""
@@ -40,21 +41,86 @@ metastudentPkgPath=""
 dataPkgPath=""
 
 def usage():
-	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
+	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--no-names] [--with-images] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
 
+def enrichOutputLinesWithNames(predLinesA,predLinesB,predLinesC):
+	nameMappingFilePath = os.path.join(configMap["DATABASE_BASE_PATH"], "nameMapping.txt")
+	nameMappingFile = open(nameMappingFilePath)
+	nameMapping = {}
+	for line in nameMappingFile:
+		#print line.rstrip("\n").split()
+		goTermId, goTermName = line.rstrip("\n").split("\t")
+		nameMapping[goTermId] = goTermName
+	nameMappingFile.close()
+	
+	newPredLinesAll = []
+	for predLines in [predLinesA,predLinesB,predLinesC]:
+		newPredLines = []
+		for predLine in predLines:
+			targetId, goTerm, rel = predLine.split("\t")
+			newPredLine = "%s\t%s\t%s\t%s" % (targetId, goTerm, rel, nameMapping[goTerm])
+			newPredLines.append(newPredLine)
+		newPredLinesAll.append(newPredLines)
+	
+	return newPredLinesAll
 
+def generateGraphImage(predLines):
+	
+	
+	
+	goTerms = []
+	for predLine in predLines:
+		targetId, goTerm = predLine.split("\t")[:2]
+		goTerms.append(goTerm)
+	
+	chunks = []
+	
+	if len(goTerms) > 0:
+		termDataTokens=[]
+		for i, goTerm in enumerate(goTerms):
+			if i == 0:
+				header = "%22" + goTerm.replace(":", "%3A") + "%22%3A"
+			else:
+				header = "%2C%22" + goTerm.replace(":", "%3A") + "%22%3A"
+			openBraket = "{"
+			formatString = "%22fill%22%3A%22yellow%22%2C%22font%22%3A++%22black%22%2C%22border%22%3A%22red%22"
+			closeBraket = "}"
+			fullToken = header + openBraket + formatString + closeBraket
+			termDataTokens.append(fullToken)
+		termDataOpt = "term_data={" + "".join(termDataTokens) + "}%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A"
+		
+		baseUrl = "http://amigo.geneontology.org/cgi-bin/amigo/visualize?"
+		modeOpt = "mode=advanced"
+		termDataTypeOpt = "term_data_type=json"
+		formatOpt = "format=png"
+		
+		fullURL = baseUrl + "&".join([modeOpt,termDataOpt,termDataTypeOpt,formatOpt])
 
+		req = urllib2.urlopen(fullURL)
+		
+		CHUNK = 16 * 1024
+		while True:
+			chunk = req.read(CHUNK)
+			if not chunk: 
+				break
+			chunks.append(chunk)
+		
+	return chunks
 
 """
 calculate coefficients for linear combinations of results
 """
-def metaPredict(preds, onto):
+def metaPredict(preds, onto, noNames):
 	protToTermToGroupToScore = collections.defaultdict(dict)
 	for i, group in enumerate(["A", "B", "C"]):
 		for line in preds[i]:
 			if line != "\n":
-				prot, goTerm, score = line.split("\t")
-				protToTermToGroupToScore[prot].setdefault(goTerm,{})[group] = float(score)
+				if not noNames:
+					prot, goTerm, score, name = line.split("\t")
+					protToTermToGroupToScore[prot].setdefault((goTerm,name),{})[group] = float(score)	
+				else:
+					prot, goTerm, score = line.split("\t")
+					protToTermToGroupToScore[prot].setdefault((goTerm,None),{})[group] = float(score)
 
 	weightA = float(configMap["GROUP_A_WEIGHT_%s" % (onto)])
 	weightB = float(configMap["GROUP_B_WEIGHT_%s" % (onto)])
@@ -63,17 +129,27 @@ def metaPredict(preds, onto):
 
 	predLines = []
 	for prot in protToTermToGroupToScore.keys():
-		for term, groupToScore in protToTermToGroupToScore[prot].iteritems():
+		for (term, name), groupToScore in protToTermToGroupToScore[prot].iteritems():
 			groupAScore = groupToScore.get("A", 0.0)
 			groupBScore = groupToScore.get("B", 0.0)
 			groupCScore = groupToScore.get("C", 0.0)
 			metaScore = (weightA * groupAScore) + (weightB * groupBScore) + (weightC * groupCScore) + intercept
 			if metaScore > 0.0:
-				if metaScore > 1.0: metaScore=1.0	
-				predLines.append( prot + "\t" + term + "\t%.2f" % metaScore )
+				if metaScore > 0.70 and onto=="MFO":
+					metaScore = 0.70
+				elif metaScore > 0.60 and onto=="BPO":
+					metaScore = 0.60
+				
+				if not noNames:
+					predLines.append( prot + "\t" + term + "\t%.2f" % metaScore +"\t" + name )
+				else:
+					predLines.append( prot + "\t" + term + "\t%.2f" % metaScore )
+	
+	predLines = sorted(predLines, key=lambda x: float(x.split("\t")[2]), reverse=True)
+	
 	return predLines	
 	
-def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug):
+def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug, noNames, withImages):
 	predLinesA = []
 	predLinesB = []
 	predLinesC = []
@@ -108,21 +184,37 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 				predLinesB = runMethodB(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_B_K_%s" % (ontology) ], ontology, configMap)
 				predLinesC = runMethodC(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_C_SCORING_%s" % (ontology) ], ontology, configMap, debug)
 				
-				if allPreds:
-					methodOutputFileA = open(outputFilePath+".%s.%s.txt" % (ontology, "A"),'w')
-					methodOutputFileA.write("\n".join(predLinesA))
-					methodOutputFileA.close()
-					methodOutputFileB = open(outputFilePath+".%s.%s.txt" % (ontology, "B"),'w')
-					methodOutputFileB.write("\n".join(predLinesB))
-					methodOutputFileB.close()
-					methodOutputFileC = open(outputFilePath+".%s.%s.txt" % (ontology, "C"),'w')
-					methodOutputFileC.write("\n".join(predLinesC))
-					methodOutputFileC.close()
+				if not noNames:
+					predLinesA,predLinesB,predLinesC = enrichOutputLinesWithNames(predLinesA,predLinesB,predLinesC)
 				
-				predLines = metaPredict([predLinesA,predLinesB,predLinesC], ontology)
+				if allPreds:
+					for predLines, methodLetter in [ (predLinesA, "A"), (predLinesB, "B"), (predLinesC, "C") ]:
+						methodOutputFile = open(outputFilePath+".%s.%s.txt" % (ontology, methodLetter),'w')
+						methodOutputFile.write("\n".join(predLines))
+						methodOutputFile.close()
+						
+						if withImages:#
+							methodImageFileChunks = generateGraphImage(predLines)
+							if len(methodImageFileChunks) > 0:
+								methodImageFile = open(outputFilePath+".%s.%s.png" % (ontology, methodLetter),'w')
+								for chunki in methodImageFileChunks:
+									methodImageFile.write(chunki)
+								methodImageFile.close()					
+				
+				predLines = metaPredict([predLinesA,predLinesB,predLinesC], ontology, noNames)
 				methodOutputFile = open(outputFilePath+".%s.txt" % (ontology),'w')
 				methodOutputFile.write("\n".join(predLines))
 				methodOutputFile.close()
+
+				if withImages:
+					methodImageFileChunks = generateGraphImage(predLines)
+					if len(methodImageFileChunks) > 0:
+						methodImageFile = open(outputFilePath+".%s.png" % (ontology),'w')
+						for chunki in methodImageFileChunks:
+							methodImageFile.write(chunki)
+						methodImageFile.close()					
+
+
 			if outputBlast:
 				p("copying back blast output")
 				try:
@@ -375,7 +467,7 @@ if __name__ == "__main__":
 
 
 	try:
-		opts, args=getopt(sys.argv[1:], "hi:o:", ["debug", "help", "silent", "keep-temp", "temp-dir=", "version", "config=", "output-blast", "blast-kickstart-databases=", "ontologies=","blast-only","all-predictions"])
+		opts, args=getopt(sys.argv[1:], "hi:o:", ["debug", "help", "silent", "keep-temp", "temp-dir=", "version", "config=", "output-blast", "no-names", "with-images", "blast-kickstart-databases=", "ontologies=","blast-only","all-predictions"])
 	except GetoptError, err:
 		print >> sys.stderr, str(err)
 		usage()
@@ -392,6 +484,8 @@ if __name__ == "__main__":
 	blastOnly=False
 	keepTemp=False
 	allPreds = False
+	noNames = False
+	withImages = False
 
 	Logger(os.path.join(metastudentPath, "metastudent.log"))
 	
@@ -463,6 +557,10 @@ if __name__ == "__main__":
 			keepTemp = True
 		elif o == "--all-predictions":
 			allPreds = True
+		elif o == "--no-names":
+			noNames = True
+		elif o == "--with-images":
+			withImages = True
 		elif o == "--ontologies":
 			ontologies = a.split(",")
 			for ontology in ontologies:
@@ -497,7 +595,13 @@ if __name__ == "__main__":
 		print >> sys.stderr,"Error: DATABASE_BASE_PATH (%s) does not exist." % configMap.get('DATABASE_BASE_PATH')
 		sys.exit(1);
 	
-	runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug)
+	numSeqs = len([None for line in open(inputFastaFilePath).read().split("\n") if line.startswith(">")])
+	if numSeqs != 1 and withImages:
+		print >> sys.stderr,"Error: option --with-images can only be used with exactly one input sequence."
+		sys.exit(1);
+		
+	
+	runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug, noNames, withImages)
 	
 
 """
@@ -570,6 +674,14 @@ Whether to only output the result of the BLAST runs, and nothing else. See optio
 =item --all-predictions
 
 Whether to output the prediction results of the individual predictors. File name format of the output file is <RESULT_FILE_PREFIX>.<ONTOLOGY>.<METHOD>.txt.
+
+=item --no-names
+
+Whether to exclude the actual GO term names as a column in the output prediction file(s).
+
+=item --with-images
+
+Whether to also generate an image that displays the predicted GO terms as a GO graph. This option can only be used with exactly one input sequence and only when connected to the internet.
 
 =item --ontologies=I<MFO or BPO or MFO,BPO>
 

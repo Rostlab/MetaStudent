@@ -217,6 +217,7 @@ def runMethodB(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_B_K, onto, conf
 	predFilesContent=[]
 	with open(outputFilePath) as f: 
 		for line in f.readlines():
+			line = line.rstrip()
 			if line.startswith("AUTHOR") or line.startswith("MODEL") or line.startswith("ACCURACY") or line.startswith("KEYWORDS") or line.startswith("END"):
 				None
 			else:
@@ -266,6 +267,7 @@ def runMethodC(blastOutputFilePath, fastaFilePath, tmpDir, scoring, onto, config
 	with open(outputFilePath) as f: 						
 		preds =  set([])
 		for line in f.readlines():
+			line=line.rstrip()
 			if line.rstrip() == "" or line.startswith("AUTHOR") or line.startswith("MODEL") or line.startswith("ACCURACY") or line.startswith("KEYWORDS") or line.startswith("END"):
 				None
 			else:
