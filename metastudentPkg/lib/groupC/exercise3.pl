@@ -124,6 +124,7 @@ foreach (@blastoutput) {
     	$target.= $_;
     	$target =~ s:\r?\n::g;
     	$target =~ s:\s*::g;
+    	$target =~ s/\(.*letters\)Database:.*//g;
     	push (@out,"Target: $target\n");
         $targetid=$target;
 		$targets{$targetid}="no prediction";
