@@ -11,6 +11,8 @@ from BlastWrapper import blastallParameters, createBlastPGPCommand
 import sys
 
 silent=False
+whiteSpaceCode = "~"
+
 
 def setSilent(val):
 	global silent
@@ -31,6 +33,31 @@ def getPkgPath():
 	else:
 		myPath = os.path.dirname(os.path.abspath(__file__))
 	return myPath
+
+def encodeFastaHeaders(fastaFilePath):
+	fastaFile = open(fastaFilePath)
+	fileContent = fastaFile.read().rstrip("\n")
+	fastaFile.close()
+	if fileContent == "":
+		Logger.log("Error: empty fasta file")
+		raise
+	
+	lines = fileContent.split("\n")
+	newLines = []
+	i=0
+
+	for line in lines:
+		if line.startswith(">"):
+			newLines.append(line.replace(" ", whiteSpaceCode).replace("\t", whiteSpaceCode))
+		else:
+			newLines.append(line)
+	
+	fastaFile = open(fastaFilePath,'w')
+	fastaFile.write("\n".join(newLines))
+	fastaFile.close()
+	
+def decodeFastaHeader(fastaHeader):
+	return fastaHeader.replace(whiteSpaceCode, " ")
 
 #preserves order of sequences
 def splitBigFastaFile(fastaFilePath, tmpDir, splitSize): 
@@ -130,7 +157,6 @@ def runMethodA(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_A_THRESHOLD, GR
 	   			"cd " + configMap["GROUP_A_PATH"],
 				"java -cp gossip.jar GOSSIPSTarter %s %s %s %s %s %s" % (fastaFilePath, blastOutputFilePath, outputFilePath, GROUP_A_THRESHOLD, GROUP_A_K, iters)]
 	commandString = ";".join(commandsi)
-	#print commandString
 
 	os.chdir(currCwd)
 
@@ -140,7 +166,7 @@ def runMethodA(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_A_THRESHOLD, GR
 		logFile = open(logPath, 'w')
 	else:
 		logFile = open(logPath, 'a')
-	
+
 	s, o = commands.getstatusoutput(commandString)
 	if True:#s != 0:
 		logFile.write("Command: " + commandString + "\n")
@@ -162,7 +188,7 @@ def runMethodA(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_A_THRESHOLD, GR
 			None
 		else:
 			targetId, goTerm, rel = line.rstrip().split("\t")
-			targetId = targetId[1:].split("(")[0]
+			targetId = targetId[1:].split("(")[0][:63]
 		
 			relFloat = max(min(float(rel), 1.00), 0.00)
 			rel = "%.2f" % (relFloat)
@@ -221,11 +247,13 @@ def runMethodB(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_B_K, onto, conf
 			if line.startswith("AUTHOR") or line.startswith("MODEL") or line.startswith("ACCURACY") or line.startswith("KEYWORDS") or line.startswith("END"):
 				None
 			else:
-				currId = line.split("\t")[0]
+				currId = line.split("\t")[0][:63]
+				restOfLine = "\t".join(line.split("\t")[1:])
 				if idToGoTermCount.get(currId, 0) < 1000: 
-					if float(line.split("\t")[2]) > 1.0:
-						line = line.rstrip("\n").replace("1.01", "1.00")
+					if float(restOfLine.split("\t")[1]) > 1.0:
+						restOfLine = restOfLine.rstrip("\n").replace("1.01", "1.00")
 					idToGoTermCount[currId] = idToGoTermCount.get(currId, 0) + 1
+					line = currId + "\t" +  restOfLine
 					predFilesContent.append(line)
 	return predFilesContent
 
@@ -271,12 +299,12 @@ def runMethodC(blastOutputFilePath, fastaFilePath, tmpDir, scoring, onto, config
 			if line.rstrip() == "" or line.startswith("AUTHOR") or line.startswith("MODEL") or line.startswith("ACCURACY") or line.startswith("KEYWORDS") or line.startswith("END"):
 				None
 			else:
-				targetId, goTerm, rel = line.rstrip().split(" ")						
+				targetId, goTerm, rel = line.rstrip().split(" ")
 				relFloat = max(min(float(rel), 1.00), 0.00)
 				rel = "%.2f" % (relFloat)					
-				line = targetId + "\t" + goTerm + "\t" + rel				
-				if targetId + "\t" + goTerm not in preds and goTerm.strip() != "" and float(rel) > 0.0:
+				line = targetId[:63] + "\t" + goTerm + "\t" + rel				
+				if targetId[:63] + "\t" + goTerm not in preds and goTerm.strip() != "" and float(rel) > 0.0:
 					predFilesContent.append(line)
-					preds.add(targetId + "\t" + goTerm)
+					preds.add(targetId[:63] + "\t" + goTerm)
 
 	return predFilesContent

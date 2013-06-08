@@ -44,40 +44,95 @@ my @cmd = qq|blastpgp -i $input -d $database $e $h $j|;
 if($?){ confess("@cmd failed: ".($?>>8)); }
 print "... done\n";
 }
+
+my $parseId = 0;
+
 foreach (@blastoutput) { 
-    next if !/^>.*?:(.+)$|^\s+(Score)|(^Searching)|^Query=\s(.*)|^\s(Identities)/;
-    if ($1 && $true==1) {$identifier.="GO:".$1; $identifier=~s/,GO:|,/,GO:/g;}
-    elsif ($2 && $true==1) {
+
+	if($parseId)
+	{
+		#print $_;
+#		if( /^(Database)/)
+#		{	
+#			print "match $1 !!!\n";
+#		}
+	}
+
+    if(!/^>.*?:(.+)$|^\s+(Score)|(^Searching)|^Query=\s(.*)|^\s(Identities)|^(Database)/)
+    {
+   		if($parseId)
+		{
+			$target .= $_;
+		}
+		next;
+    }
+
+    if ($1 && $true==1) 
+    {
+    	$identifier.="GO:".$1; 
+    	$identifier=~s/,GO:|,/,GO:/g;
+    }
+    elsif ($2 && $true==1) 
+    {
         $_=~/Score\s=\s+(\d+).*Expect\s=\s(.+),/;
         $score=$1;
         $evalue=$2;
     }
-    elsif ($5 && $true==1){
-        if($_=~/Identities\s=\s(\d+\/\d+).*/){
-	$identities=$1;}	
-	if ($_=~/Positives\s=\s(\d+\/\d+).*/){
-	$positives=$1;}
-	if($_=~/Gaps\s=\s(\d+\/\d+).*/){
-        $gaps=$1;}
-	else {
-	$gaps = "0";}
-        
-	
-        if ($identifier) {
+    elsif ($5 && $true==1)
+    {
+        if($_=~/Identities\s=\s(\d+\/\d+).*/)
+        {
+			$identities=$1;
+        }	
+		if ($_=~/Positives\s=\s(\d+\/\d+).*/)
+		{
+			$positives=$1;
+		}
+		if($_=~/Gaps\s=\s(\d+\/\d+).*/)
+		{
+        	$gaps=$1;
+		}
+		else 
+		{
+			$gaps = "0";
+		}
+        if ($identifier) 
+        {
             $targets{$targetid}=$identifier;
-            push (@out, "$evalue\t$score\t$identities\t$positives\t$gaps\t$identifier\n"); undef $identifier; undef $evalue; undef $score; undef $identities; undef $positives; undef $gaps;
-	}
+            push (@out, "$evalue\t$score\t$identities\t$positives\t$gaps\t$identifier\n"); 
+            undef $identifier; 
+            undef $evalue; 
+            undef $score; 
+            undef $identities; 
+            undef $positives; 
+            undef $gaps;
+		}
         #else {print $fhout "$1\t\talternative alignment\n";}
     }
-    elsif ($3) {$true=1;}
-    elsif ($4) {
+    elsif ($3) 
+    {
+    	$true=1;
+    }
+    elsif ($4) 
+    {
+    	#print "start parsing\n";
+    	$parseId = 1;
         $target.=$4;
-#       if ($target =~ /.*:(.+)$/) {$target="GO:".$1; $target=~s/,/,GO:/g; }
-        push (@out,"Target: $target\n");
+    }
+    elsif ($6)
+    {
+    	$target.= $_;
+    	$target =~ s:\r?\n::g;
+    	$target =~ s:\s*::g;
+    	push (@out,"Target: $target\n");
         $targetid=$target;
-	$targets{$targetid}="no prediction";
+		$targets{$targetid}="no prediction";
         $true=0;
         undef $target;
+
+
+    	$parseId = 0;
+    	#print "stop parsing #####start###$target####stop###\n";
     }
 }
 

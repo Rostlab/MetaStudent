@@ -28,7 +28,7 @@ import math
 from ConfigParser import RawConfigParser
 import collections
 from metastudentPkg.runMethods import runBlast, runMethodA, runMethodB,\
-	runMethodC, getPkgPath, p, silent, setSilent, isSilent
+	runMethodC, getPkgPath, p, silent, setSilent, isSilent,encodeFastaHeaders,decodeFastaHeader
 from metastudentPkg.Logger import Logger
 import commands
 import metastudentPkg
@@ -39,12 +39,13 @@ configMap=None
 metastudentPath=""
 metastudentPkgPath=""
 dataPkgPath=""
+dataPkg2Path=""
 
 def usage():
 	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--no-names] [--with-images] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
 
 def enrichOutputLinesWithNames(predLinesA,predLinesB,predLinesC):
-	nameMappingFilePath = os.path.join(configMap["DATABASE_BASE_PATH"], "nameMapping.txt")
+	nameMappingFilePath = os.path.join(configMap["DATABASE_2_BASE_PATH"], "nameMapping.txt")
 	nameMappingFile = open(nameMappingFilePath)
 	nameMapping = {}
 	for line in nameMappingFile:
@@ -65,9 +66,6 @@ def enrichOutputLinesWithNames(predLinesA,predLinesB,predLinesC):
 	return newPredLinesAll
 
 def generateGraphImage(predLines):
-	
-	
-	
 	goTerms = []
 	for predLine in predLines:
 		targetId, goTerm = predLine.split("\t")[:2]
@@ -141,9 +139,9 @@ def metaPredict(preds, onto, noNames):
 					metaScore = 0.60
 				
 				if not noNames:
-					predLines.append( prot + "\t" + term + "\t%.2f" % metaScore +"\t" + name )
+					predLines.append( decodeFastaHeader(prot) + "\t" + term + "\t%.2f" % metaScore +"\t" + name )
 				else:
-					predLines.append( prot + "\t" + term + "\t%.2f" % metaScore )
+					predLines.append( decodeFastaHeader(prot) + "\t" + term + "\t%.2f" % metaScore )
 	
 	predLines = sorted(predLines, key=lambda x: x.split("\t")[0] + str(1-float(x.split("\t")[2])))
 	
@@ -164,6 +162,7 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 		try:
 			fastaFilePathLocal = os.path.join(tmpDirPath, os.path.basename(inputFastaFilePath)) 
 			copy2(inputFastaFilePath, os.path.join(tmpDirPath, fastaFilePathLocal))
+			encodeFastaHeaders(os.path.join(tmpDirPath, fastaFilePathLocal))
 		except (IOError, os.error), why:
 			Logger.log("Error copying files " + str(why))
 		
@@ -239,6 +238,7 @@ def formatPath(path):
 	return path.replace("<ms-path>",metastudentPath) \
 		.replace("<pkg-path>", metastudentPkgPath) \
 		.replace("<default-data-package-path>", dataPkgPath) \
+		.replace("<default-data-package-2-path>", dataPkg2Path) \
 		.replace("<python-package-path>", metastudentPkgPath)
 
 def readConfigFile(configMap, configPath):
@@ -278,6 +278,8 @@ def readConfigFile(configMap, configPath):
 				sys.exit(1)
 		if config.has_option('General', "DATABASE_BASE_PATH"):
 			configMap["DATABASE_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_BASE_PATH'))
+		if config.has_option('General', "DATABASE_2_BASE_PATH"):
+			configMap["DATABASE_2_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_2_BASE_PATH'))
 		if config.has_option('General', "FASTA_SPLIT_SIZE"):
 			try:
 				configMap["FASTA_SPLIT_SIZE"]=int(config.get('General', 'FASTA_SPLIT_SIZE'))
@@ -461,6 +463,7 @@ if __name__ == "__main__":
 		metastudentPath = os.path.dirname(os.path.abspath(__file__))
 	metastudentPkgPath=getPkgPath()
 	dataPkgPath=os.path.join(sys.prefix, "share", "metastudent-data")
+	dataPkg2Path=os.path.join(sys.prefix, "share", "metastudent-data-2")
 
 	if commands.getstatusoutput('pp_popcon_cnt -p metastudent')[0] != 0:
 		print >> sys.stderr, "The Rost Lab recommends you install the pp-popularity-contest package that provides pp_popcon_cnt:\n\nsudo apt-get install pp-popularity-contest\n"
