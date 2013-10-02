@@ -4,8 +4,4 @@ Metastudent predicts GO terms for given amino acid sequences by joining the pred
 
 How to generate the distributable tar archive
 =============================================
-Until setup.py sdist can do it:
-
- * dpkg-source '--format=3.0 (native)' -b .
-
-This generates the ../metastudent_*.tar.gz archive.
+$ setup.py sdist
