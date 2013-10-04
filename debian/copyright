@@ -1,0 +1,68 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: metastudent
+Upstream-Contact: Tobias Hamp <hampt@rostlab.org>
+Source: ftp://rostlab.org/metastudent/
+
+Files: metastudentPkg/lib/groupA/GO_Parser/src/ParseGONew.java
+Copyright: 2010, Ariane Böhm
+License: GPL-2+
+
+Files: metastudentPkg/lib/groupA/Validation/src/Validator.java
+Copyright: 2010, Ariane Böhm
+           2010, Yannick Mahlich
+License: GPL-2+
+
+Files: metastudentPkg/lib/groupB/pp2/prediction/knn/BlastResultList.java metastudentPkg/lib/groupB/pp2/prediction/knn/DAGNode.java metastudentPkg/lib/groupB/pp2/prediction/knn/KNNPredictor.java metastudentPkg/lib/groupB/pp2/prediction/knn/KNNKernel.java metastudentPkg/lib/groupB/pp2/prediction/knn/PredictionTarget.java metastudentPkg/lib/groupB/pp2/prediction/knn/BlastHit.java metastudentPkg/lib/groupB/pp2/prediction/knn/kNearestNeighbor.java metastudentPkg/lib/groupB/pp2/prediction/knn/GoNode.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/BlastResultList.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/DAGNode.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/KNNPredictor.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/KNNKernel.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/PredictionTarget.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/BlastHit.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/kNearestNeighbor.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/GoNode.java
+Copyright: 2010, Thomas Hopf
+License: GPL-2+
+
+Files: metastudentPkg/lib/groupB/pp2/prediction/knn/DetermineDistribution.java metastudentPkg/lib/groupB/pp2/tools/RMethods.java metastudentPkg/lib/groupB/src/pp2/prediction/knn/DetermineDistribution.java
+Copyright: 2010, Stefanie Kaufmann
+License: GPL-2+
+
+Files: metastudentPkg/lib/groupB/pp2/go/Relations.java metastudentPkg/lib/groupB/pp2/go/DAG.java metastudentPkg/lib/groupB/src/pp2/go/Relations.java metastudentPkg/lib/groupB/src/pp2/go/DAG.java
+Copyright: 2010, Mark Heron
+License: GPL-2+
+
+Files: metastudentPkg/lib/groupC/treehandler.pl metastudentPkg/lib/groupC/treehandler_new.pl
+Copyright: 2010, Peter Hoenigschmid
+License: GPL-2+
+
+Files: metastudentPkg/lib/groupC/Report.*
+Copyright: 2010, Dominik Achten
+           2010, Michael Kiening
+           2010, Maximilian Hecht
+           2010, Peter Hönigschmid
+           2010, Florian Auer
+           2010, Manfred Roos
+License: GPL-2+
+
+Files: metastudent
+Copyright: 2012-2013 Tobias Hamp <hampt@rostlab.org>
+License: GPL-2+
+
+Files: debian/*
+Copyright: 2011-2013, Tobias Hamp <hampt@rostlab.org>
+           2013, Laszlo Kajan <lkajan@debian.org>
+License: GPL-2+
+
+Files: *
+Copyright: 2010-2013, Tobias Hamp <hampt@rostlab.org>
+License: GPL-2+
+
+License: GPL-2+
+    This package is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+    .
+    This package is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    .  
+    You should have received a copy of the GNU General Public License
+    along with this package; if not, see .
+    .
+    On Debian systems, the complete text of the GNU General Public
+    License version 2 can be found in `/usr/share/common-licenses/GPL-2'
