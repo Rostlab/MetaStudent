@@ -2,3 +2,4 @@ include *.conf
 include *.1.gz
 include ChangeLog
 include MANIFEST.in
+recursive-include metastudentPkg/lib *.java
