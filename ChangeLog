@@ -1,3 +1,9 @@
+metastudent (1.0.11) unstable; urgency=low
+
+  * Added missing dependendency in control file.
+
+ -- Tobias Hamp <hampt@rostlab.org>  Fri, 6 Dec 2013 12:10:42 +0200
+
 metastudent (1.0.10) unstable; urgency=low
 
   * Bugfix for long fasta headers.
