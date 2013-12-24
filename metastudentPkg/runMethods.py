@@ -152,10 +152,11 @@ def runMethodA(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_A_THRESHOLD, GR
 	currCwd = os.getcwd()
 	
 	tmpDirPath = os.path.join(tmpDir, "methodA")
+	jarPath = os.path.join(configMap["JAR_INSTALL_FOLDER_PATH"], "gossip.jar")
 	outputFilePath = os.path.join(tmpDirPath, "output.%s.cafa.txt" % (onto))
 	commandsi = ["mkdir -p " + tmpDirPath, 
 	   			"cd " + configMap["GROUP_A_PATH"],
-				"java -cp gossip.jar GOSSIPSTarter %s %s %s %s %s %s" % (fastaFilePath, blastOutputFilePath, outputFilePath, GROUP_A_THRESHOLD, GROUP_A_K, iters)]
+				"java -cp %s GOSSIPSTarter %s %s %s %s %s %s" % (jarPath, fastaFilePath, blastOutputFilePath, outputFilePath, GROUP_A_THRESHOLD, GROUP_A_K, iters)]
 	commandString = ";".join(commandsi)
 
 	os.chdir(currCwd)
@@ -209,11 +210,12 @@ def runMethodB(blastOutputFilePath, fastaFilePath, tmpDir, GROUP_B_K, onto, conf
 	tmpDirPath = os.path.join(tmpDir, "methodB")
 	if not os.path.exists(tmpDirPath):
 		os.mkdir(tmpDirPath)
+	jarPath = configMap["JAR_INSTALL_FOLDER_PATH"].rstrip("/")
 	outputFilePath = os.path.join(tmpDirPath, onto)
 	os.mkdir(outputFilePath)
 	commandsi = ["mkdir -p " + tmpDirPath, 
 	   			"cd " + configMap["GROUP_B_PATH"],
-				"./knn_weighted -m weighted_knn -j %s -d %s -i %s -o %s -k %s" % (blastOutputFilePath, blastOutputFilePath, fastaFilePath, outputFilePath, GROUP_B_K)]
+				"./knn_weighted -m weighted_knn -j %s -d %s -i %s -o %s -k %s -l %s" % (blastOutputFilePath, blastOutputFilePath, fastaFilePath, outputFilePath, GROUP_B_K, jarPath)]
 	commandString = ";".join(commandsi)
 	#print commandString
 	os.chdir(currCwd)

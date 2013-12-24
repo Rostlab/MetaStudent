@@ -1,4 +1,4 @@
-metastudent (1.0.11) unstable; urgency=low
+metastudent (1.0.11) UNRELEASED; urgency=low
 
   * Added missing dependendency in control file.
 

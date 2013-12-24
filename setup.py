@@ -19,8 +19,8 @@ if childP.poll() != 0:
 	print >> sys.stderr, "Stdout: %s" % (stdout)
 	print >> sys.stderr, "Stderr: %s" % (stderr)
 	sys.exit(1)
-	
-	
+
+
 pkgPath=getPkgPath()
 dataFiles=[]
 exeSuffixes=set([".rb",".py",".pl",".sh",".class",".jar",".exe"])

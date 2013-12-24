@@ -276,6 +276,12 @@ def readConfigFile(configMap, configPath):
 			else:
 				print >> sys.stderr,"Wrong argument for option BLASTPGP_EXE_PATH"
 				sys.exit(1)
+                if config.has_option('General', "JAR_INSTALL_FOLDER_PATH"):
+                        if os.path.exists(config.get('General', 'JAR_INSTALL_FOLDER_PATH')):
+                                configMap["JAR_INSTALL_FOLDER_PATH"]=config.get('General', 'JAR_INSTALL_FOLDER_PATH')
+                        else:   
+                                print >> sys.stderr,"Wrong argument for option JAR_INSTALL_FOLDER_PATH"
+                                sys.exit(1)
 		if config.has_option('General', "DATABASE_BASE_PATH"):
 			configMap["DATABASE_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_BASE_PATH'))
 		if config.has_option('General', "DATABASE_2_BASE_PATH"):
