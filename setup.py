@@ -6,7 +6,7 @@ import sys
 from metastudentPkg.version import VERSION
 import os
 
-from metastudentPkg.runMethods import getPkgPath
+from metastudentPkg.commons import getPkgPath
 import shutil
 import tempfile
 
