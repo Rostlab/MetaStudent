@@ -41,6 +41,7 @@ metastudentPath=""
 metastudentPkgPath=""
 dataPkgPath=""
 dataPkg2Path=""
+dataPkg3Path=""
 
 def usage():
 	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--no-names] [--with-images] [--ontologies=<MFO or BPO or CCO or MFO,BPO or ...>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
@@ -262,6 +263,7 @@ def formatPath(path):
 		.replace("<pkg-path>", metastudentPkgPath) \
 		.replace("<default-data-package-path>", dataPkgPath) \
 		.replace("<default-data-package-2-path>", dataPkg2Path) \
+		.replace("<default-data-package-3-path>", dataPkg3Path) \
 		.replace("<python-package-path>", metastudentPkgPath)
 
 def readConfigFile(configMap, configPath):
@@ -580,6 +582,7 @@ if __name__ == "__main__":
 	metastudentPkgPath=getPkgPath()
 	dataPkgPath=os.path.join(sys.prefix, "share", "metastudent-data")
 	dataPkg2Path=os.path.join(sys.prefix, "share", "metastudent-data-2")
+	dataPkg3Path=os.path.join(sys.prefix, "share", "metastudent-data-3")
 
 	if commands.getstatusoutput('pp_popcon_cnt -p metastudent')[0] != 0:
 		print >> sys.stderr, "The Rost Lab recommends you install the pp-popularity-contest package that provides pp_popcon_cnt:\n\nsudo apt-get install pp-popularity-contest\n"
