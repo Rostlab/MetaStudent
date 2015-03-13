@@ -28,8 +28,9 @@ import math
 from ConfigParser import RawConfigParser
 import collections
 from metastudentPkg.runMethods import runBlast, runMethodA, runMethodB,\
-	runMethodC, getPkgPath, p, silent, setSilent, isSilent,encodeFastaHeaders,decodeFastaHeader
+	runMethodC
 from metastudentPkg.Logger import Logger
+from metastudentPkg.commons import GOConfig, GeneOntology, GOPrediction, encodeFastaHeaders, decodeFastaHeader, p, setSilent, isSilent, getPkgPath, splitBigFastaFile
 import commands
 import metastudentPkg
 from metastudentPkg.version import VERSION
@@ -42,28 +43,17 @@ dataPkgPath=""
 dataPkg2Path=""
 
 def usage():
-	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--no-names] [--with-images] [--ontologies=<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
+	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--no-names] [--with-images] [--ontologies=<MFO or BPO or CCO or MFO,BPO or ...>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
 
-def enrichOutputLinesWithNames(predLinesA,predLinesB,predLinesC):
-	nameMappingFilePath = os.path.join(configMap["DATABASE_2_BASE_PATH"], "nameMapping.txt")
-	nameMappingFile = open(nameMappingFilePath)
-	nameMapping = {}
-	for line in nameMappingFile:
-		#print line.rstrip("\n").split()
-		goTermId, goTermName = line.rstrip("\n").split("\t")
-		nameMapping[goTermId] = goTermName
-	nameMappingFile.close()
-	
-	newPredLinesAll = []
-	for predLines in [predLinesA,predLinesB,predLinesC]:
+def enrichOutputLinesWithNames(predLinesDict, geneOntology):
+	for methodChar, predLines in predLinesDict.iteritems():
 		newPredLines = []
 		for predLine in predLines:
 			targetId, goTerm, rel = predLine.split("\t")
-			newPredLine = "%s\t%s\t%s\t%s" % (targetId, goTerm, rel, nameMapping[goTerm])
+			newPredLine = "%s\t%s\t%s\t%s" % (targetId, goTerm, rel, geneOntology.termToName[goTerm])
 			newPredLines.append(newPredLine)
 		newPredLinesAll.append(newPredLines)
-	
-	return newPredLinesAll
+		predLinesDict[methodChar] = newPredLines
 
 def generateGraphImage(predLines):
 	goTerms = []
@@ -74,6 +64,7 @@ def generateGraphImage(predLines):
 	chunks = []
 	
 	if len(goTerms) > 0:
+		
 		termDataTokens=[]
 		for i, goTerm in enumerate(goTerms):
 			if i == 0:
@@ -87,7 +78,7 @@ def generateGraphImage(predLines):
 			termDataTokens.append(fullToken)
 		termDataOpt = "term_data={" + "".join(termDataTokens) + "}%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A"
 		
-		baseUrl = "http://amigo.geneontology.org/cgi-bin/amigo/visualize?"
+		baseUrl = "http://amigo1.geneontology.org/cgi-bin/amigo/visualize?"
 		modeOpt = "mode=advanced"
 		termDataTypeOpt = "term_data_type=json"
 		formatOpt = "format=png"
@@ -108,17 +99,18 @@ def generateGraphImage(predLines):
 """
 calculate coefficients for linear combinations of results
 """
-def metaPredict(preds, onto, noNames):
+def metaPredict(preds, go, onto):
+	
+	targetList = preds.items()[0][1].targetsSorted
+	
 	protToTermToGroupToScore = collections.defaultdict(dict)
-	for i, group in enumerate(["A", "B", "C"]):
-		for line in preds[i]:
-			if line != "\n":
-				if not noNames:
-					prot, goTerm, score, name = line.split("\t")
-					protToTermToGroupToScore[prot].setdefault((goTerm,name),{})[group] = float(score)	
-				else:
-					prot, goTerm, score = line.split("\t")
-					protToTermToGroupToScore[prot].setdefault((goTerm,None),{})[group] = float(score)
+	
+	for methodChar, predictioni in preds.iteritems():
+		targetToTermToScore = predictioni.targetToTermToScore
+		for target, termToScore in targetToTermToScore.iteritems():
+			for term, score in termToScore.iteritems():
+				protToTermToGroupToScore[target].setdefault((term,None),{})[methodChar] = float(score)	
+
 
 	weightA = float(configMap["GROUP_A_WEIGHT_%s" % (onto)])
 	weightB = float(configMap["GROUP_B_WEIGHT_%s" % (onto)])
@@ -133,24 +125,23 @@ def metaPredict(preds, onto, noNames):
 			groupCScore = groupToScore.get("C", 0.0)
 			metaScore = (weightA * groupAScore) + (weightB * groupBScore) + (weightC * groupCScore) + intercept
 			if metaScore > 0.0:
-				if metaScore > 0.70 and onto=="MFO":
-					metaScore = 0.70
-				elif metaScore > 0.60 and onto=="BPO":
-					metaScore = 0.60
+				if metaScore > 0.95 and onto=="MFO":
+					metaScore = 0.95
+				elif metaScore > 0.95 and onto=="BPO":
+					metaScore = 0.95
+				elif metaScore > 0.95 and onto=="CCO":
+					metaScore = 0.95
 				
-				if not noNames:
-					predLines.append( decodeFastaHeader(prot) + "\t" + term + "\t%.2f" % metaScore +"\t" + name )
-				else:
-					predLines.append( decodeFastaHeader(prot) + "\t" + term + "\t%.2f" % metaScore )
+				predLines.append( prot + "\t" + term + "\t%.2f" % metaScore )
 	
-	predLines = sorted(predLines, key=lambda x: x.split("\t")[0] + str(1-float(x.split("\t")[2])))
+	metaPred = GOPrediction(predLines, go)
 	
-	return predLines	
+	return metaPred	
 	
 def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickstartDatabasePaths, ontologies, blastOnly, keepTemp, allPreds, debug, noNames, withImages):
-	predLinesA = []
-	predLinesB = []
-	predLinesC = []
+	predLinesDict = {}
+	predsDict = {}
+	
 	try:
 		p("Creating tmpDir...")
 		tmpDirPath=""
@@ -166,9 +157,22 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 		except (IOError, os.error), why:
 			Logger.log("Error copying files " + str(why))
 		
+		p("Loading Gene Ontology...")
+		try:
+			goTreeFilePath = os.path.join(configMap["DATABASE_3_BASE_PATH"], "goGraph.txt")	
+			closureFilePath = os.path.join(configMap["DATABASE_3_BASE_PATH"], "fullTransitiveClosureGO.txt")
+			nameMappingFilePath = os.path.join(configMap["DATABASE_3_BASE_PATH"], "nameMapping.txt")
+			goConfig = GOConfig()
+			goConfig.setTreeFilePath(goTreeFilePath)
+			goConfig.setClosureFilePath(closureFilePath)
+			goConfig.setNameMappingFilePath(nameMappingFilePath)
+			geneOntology = GeneOntology(goConfig)
+		except (IOError, os.error), why:
+			Logger.log("Error loading Gene Ontology " + str(why))
+		
 		for i, ontology in enumerate(ontologies):
 			
-			database = os.path.join(os.path.join(configMap["DATABASE_BASE_PATH"], ontology), configMap["BLAST_SRC_%s" % (ontology) ] + ".fasta")
+			database = os.path.join(os.path.join(configMap["DATABASE_3_BASE_PATH"], ontology), configMap["BLAST_SRC_%s" % (ontology) ] + ".fasta")
 			
 			suffix="_eval%s_iters%s_src%s.%s.blast" % (configMap["BLAST_EVAL_%s" % (ontology)], configMap["BLAST_ITERS_%s" % (ontology)], configMap["BLAST_SRC_%s" % (ontology)], ontology.lower())	
 			blastOutputFilePathLocal = fastaFilePathLocal+suffix
@@ -179,34 +183,55 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 				runBlast(fastaFilePathLocal, database, blastOutputFilePathLocal, tmpDirPath, configMap["BLAST_EVAL_%s" % (ontology)], configMap["BLAST_ITERS_%s" % (ontology)], configMap)
 				blastKickstartDatabasePath = blastOutputFilePathLocal
 			if not blastOnly:
-				predLinesA = runMethodA(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_A_THRESHOLD_%s" % (ontology)], configMap["GROUP_A_K_%s" % (ontology) ], configMap["BLAST_ITERS_%s" % (ontology)], ontology, configMap)
-				predLinesB = runMethodB(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_B_K_%s" % (ontology) ], ontology, configMap)
-				predLinesC = runMethodC(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_C_SCORING_%s" % (ontology) ], ontology, configMap, debug)
+				predLinesDict["A"] = runMethodA(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_A_THRESHOLD_%s" % (ontology)], configMap["GROUP_A_K_%s" % (ontology) ], configMap["BLAST_ITERS_%s" % (ontology)], ontology, configMap)
+				predLinesDict["B"] = runMethodB(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_B_K_%s" % (ontology) ], ontology, configMap)
+				predLinesDict["C"] = runMethodC(blastKickstartDatabasePath, fastaFilePathLocal, tmpDirPath, configMap["GROUP_C_SCORING_%s" % (ontology) ], ontology, configMap, debug)
 				
-				if not noNames:
-					predLinesA,predLinesB,predLinesC = enrichOutputLinesWithNames(predLinesA,predLinesB,predLinesC)
+
 				
+				for methodChar, predLines in predLinesDict.iteritems():
+
+					predsDict[methodChar] = GOPrediction(predLines, geneOntology)
+
+					predsDict[methodChar].propagatePrediction()
+
+					if not noNames:
+						predLinesDict[methodChar] = predsDict[methodChar].toOutputLinesWithNames()
+					else:
+
+						predLinesDict[methodChar] = predsDict[methodChar].toOutputLines()
+
 				if allPreds:
-					for predLines, methodLetter in [ (predLinesA, "A"), (predLinesB, "B"), (predLinesC, "C") ]:
-						methodOutputFile = open(outputFilePath+".%s.%s.txt" % (ontology, methodLetter),'w')
-						methodOutputFile.write("\n".join(predLines))
+					for methodChar, predLines in predLinesDict.iteritems():
+
+						methodOutputFile = open(outputFilePath+".%s.%s.txt" % (ontology, methodChar),'w')
+						methodOutputFile.write("".join(predLinesDict[methodChar]))
 						methodOutputFile.close()
 						
-						if withImages:#
-							methodImageFileChunks = generateGraphImage(predLines)
+						if withImages:
+							methodImageFileChunks = generateGraphImage(predLinesDict[methodChar])
 							if len(methodImageFileChunks) > 0:
-								methodImageFile = open(outputFilePath+".%s.%s.png" % (ontology, methodLetter),'w')
+								methodImageFile = open(outputFilePath+".%s.%s.png" % (ontology, methodChar),'w')
 								for chunki in methodImageFileChunks:
 									methodImageFile.write(chunki)
 								methodImageFile.close()					
-				
-				predLines = metaPredict([predLinesA,predLinesB,predLinesC], ontology, noNames)
+
+				predsMeta = metaPredict(predsDict, geneOntology, ontology)
+
+				predsMeta.propagatePrediction()
+
+				predLinesMeta=None
+				if not noNames:
+					predLinesMeta = predsMeta.toOutputLinesWithNames()
+				else:
+					predLinesMeta = predsMeta.toOutputLines()
+					
 				methodOutputFile = open(outputFilePath+".%s.txt" % (ontology),'w')
-				methodOutputFile.write("\n".join(predLines))
+				methodOutputFile.write("".join(predLinesMeta))
 				methodOutputFile.close()
 
 				if withImages:
-					methodImageFileChunks = generateGraphImage(predLines)
+					methodImageFileChunks = generateGraphImage(predLinesMeta)
 					if len(methodImageFileChunks) > 0:
 						methodImageFile = open(outputFilePath+".%s.png" % (ontology),'w')
 						for chunki in methodImageFileChunks:
@@ -231,8 +256,6 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 			rmtree(tmpDirPath)
 		p("\n====== Metastudent finished ======\n")
 
-	
-	return (predLinesA,predLinesB,predLinesC)
 
 def formatPath(path):
 	return path.replace("<ms-path>",metastudentPath) \
@@ -286,6 +309,8 @@ def readConfigFile(configMap, configPath):
 			configMap["DATABASE_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_BASE_PATH'))
 		if config.has_option('General', "DATABASE_2_BASE_PATH"):
 			configMap["DATABASE_2_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_2_BASE_PATH'))
+		if config.has_option('General', "DATABASE_3_BASE_PATH"):
+			configMap["DATABASE_3_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_3_BASE_PATH'))
 		if config.has_option('General', "FASTA_SPLIT_SIZE"):
 			try:
 				configMap["FASTA_SPLIT_SIZE"]=int(config.get('General', 'FASTA_SPLIT_SIZE'))
@@ -310,7 +335,12 @@ def readConfigFile(configMap, configPath):
 			else:
 				print >> sys.stderr,"Wrong argument for option GROUP_C_PATH"
 				sys.exit(1)	
-				
+
+
+
+
+
+
 		if config.has_option('General', "GROUP_A_WEIGHT_MFO"):
 			try:
 				configMap["GROUP_A_WEIGHT_MFO"]=float(config.get('General', 'GROUP_A_WEIGHT_MFO'))
@@ -379,12 +409,15 @@ def readConfigFile(configMap, configPath):
 				sys.exit(1)
 			configMap["BLAST_ITERS_MFO"]=config.get('General', 'BLAST_ITERS_MFO')
 		if config.has_option('General', "BLAST_SRC_MFO"):
-			if config.get('General', 'BLAST_SRC_MFO') in ["all","exp"]:
+			if config.get('General', 'BLAST_SRC_MFO') in ["goaexp", "goasp", "spall", "spexp", "upexp", "all","exp","expup"]:
 				configMap["BLAST_SRC_MFO"] = config.get('General', 'BLAST_SRC_MFO')
 			else:
 				print >> sys.stderr,"Wrong argument for option BLAST_SRC_MFO"
 				sys.exit(1)
-				
+
+
+
+
 		if config.has_option('General', "GROUP_A_WEIGHT_BPO"):
 			try:
 				configMap["GROUP_A_WEIGHT_BPO"]=float(config.get('General', 'GROUP_A_WEIGHT_BPO'))
@@ -453,13 +486,90 @@ def readConfigFile(configMap, configPath):
 				sys.exit(1)
 			configMap["BLAST_ITERS_BPO"]=config.get('General', 'BLAST_ITERS_BPO')
 		if config.has_option('General', "BLAST_SRC_BPO"):
-			if config.get('General', 'BLAST_SRC_BPO') in ["all","exp"]:
+			if config.get('General', 'BLAST_SRC_BPO') in ["goaexp", "goasp", "spall", "spexp", "upexp", "all","exp","expup"]:
 				configMap["BLAST_SRC_BPO"] = config.get('General', 'BLAST_SRC_BPO')
 			else:
 				print >> sys.stderr,"Wrong argument for option BLAST_SRC_BPO"
 				sys.exit(1)
 
 				
+
+
+		if config.has_option('General', "GROUP_A_WEIGHT_CCO"):
+			try:
+				configMap["GROUP_A_WEIGHT_CCO"]=float(config.get('General', 'GROUP_A_WEIGHT_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_WEIGHT_CCO"
+				sys.exit(1)
+		if config.has_option('General', "GROUP_B_WEIGHT_CCO"):
+			try:
+				configMap["GROUP_B_WEIGHT_CCO"]=float(config.get('General', 'GROUP_B_WEIGHT_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_B_WEIGHT_CCO"
+				sys.exit(1)
+		if config.has_option('General', "GROUP_C_WEIGHT_CCO"):
+			try:
+				configMap["GROUP_C_WEIGHT_CCO"]=float(config.get('General', 'GROUP_C_WEIGHT_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_C_WEIGHT_CCO"
+				sys.exit(1)
+		if config.has_option('General', "INTERCEPT_CCO"):
+			try:
+				configMap["INTERCEPT_CCO"]=float(config.get('General', 'INTERCEPT_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option INTERCEPT_CCO"
+				sys.exit(1)
+				
+		if config.has_option('General', "GROUP_A_THRESHOLD_CCO"):
+			try:
+				float(config.get('General', 'GROUP_A_THRESHOLD_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_THRESHOLD_CCO"
+				sys.exit(1)
+			configMap["GROUP_A_THRESHOLD_CCO"]=config.get('General', 'GROUP_A_THRESHOLD_CCO')
+		if config.has_option('General', "GROUP_A_K_CCO"):
+			try:
+				int(config.get('General', 'GROUP_A_K_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_A_K_CCO"
+				sys.exit(1)
+			configMap["GROUP_A_K_CCO"]=config.get('General', 'GROUP_A_K_CCO')
+		if config.has_option('General', "GROUP_B_K_CCO"):
+			try:
+				int(config.get('General', 'GROUP_B_K_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_B_K_CCO"
+				sys.exit(1)
+			configMap["GROUP_B_K_CCO"]=config.get('General', 'GROUP_B_K_CCO')
+		if config.has_option('General', "GROUP_C_SCORING_CCO"):
+			try:
+				int(config.get('General', 'GROUP_C_SCORING_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option GROUP_C_SCORING_CCO"
+				sys.exit(1)
+			configMap["GROUP_C_SCORING_CCO"]=config.get('General', 'GROUP_C_SCORING_CCO')
+		if config.has_option('General', "BLAST_EVAL_CCO"):
+			try:
+				float(config.get('General', 'BLAST_EVAL_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option BLAST_EVAL_CCO"
+				sys.exit(1)
+			configMap["BLAST_EVAL_CCO"]=config.get('General', 'BLAST_EVAL_CCO')
+		if config.has_option('General', "BLAST_ITERS_CCO"):
+			try:
+				int(config.get('General', 'BLAST_ITERS_CCO'))
+			except ValueError:
+				print >> sys.stderr,"Wrong argument for option BLAST_ITERS_CCO"
+				sys.exit(1)
+			configMap["BLAST_ITERS_CCO"]=config.get('General', 'BLAST_ITERS_CCO')
+		if config.has_option('General', "BLAST_SRC_CCO"):
+			if config.get('General', 'BLAST_SRC_CCO') in ["goaexp", "goasp", "spall", "spexp", "upexp","all","exp","expup"]:
+				configMap["BLAST_SRC_CCO"] = config.get('General', 'BLAST_SRC_CCO')
+			else:
+				print >> sys.stderr,"Wrong argument for option BLAST_SRC_CCO"
+				sys.exit(1)
+
+
 
 if __name__ == "__main__":
 	currentPath = os.getcwd()
@@ -487,9 +597,9 @@ if __name__ == "__main__":
 	outputFilePath=""
 	tempDirPath=""
 	customConfigFilePath=""
-	blastKickstartDatabasePaths=["",""]
+	blastKickstartDatabasePaths=["","",""]
 	outputBlast=False
-	ontologies=["MFO","BPO"]
+	ontologies=["MFO","BPO","CCO"]
 	blastOnly=False
 	keepTemp=False
 	allPreds = False
@@ -549,8 +659,6 @@ if __name__ == "__main__":
 						print >> sys.stderr,"Error: blast-kickstart-database does not exist."
 						sys.exit(1)
 				blastKickstartDatabasePaths.append(dbAbs)
-			p(blastKickstartDatabasePathsTmp)
-			p(blastKickstartDatabasePaths)
 		elif o == "--debug":
 			debug = True;
 		elif o in ("-h", "--help"):
@@ -573,16 +681,22 @@ if __name__ == "__main__":
 		elif o == "--ontologies":
 			ontologies = a.split(",")
 			for ontology in ontologies:
-				if ontology not in ["MFO", "BPO"]:
+				if ontology not in ["MFO", "BPO","CCO"]:
 					print >> sys.stderr,"Error: unknown ontology: " % (ontology)
 					sys.exit(1)
 		else:
 			assert False, "Error: Unhandled option: " + o
 			sys.exit(1)
 
-	if blastKickstartDatabasePaths != ["",""] and len(ontologies) != len(blastKickstartDatabasePaths):
-		print >> sys.stderr,"Error: number of kickstart databases not equal to number of ontologies."
-		sys.exit(1)
+	if blastKickstartDatabasePaths != ["","",""]:
+		if len(ontologies) != len(blastKickstartDatabasePaths):
+			print >> sys.stderr,"Error: number of kickstart databases not equal to number of ontologies."
+			sys.exit(1)
+		else:
+			p("BLAST results pre-calculted")
+			for blastKickstartDatabasePath in blastKickstartDatabasePaths:
+				if blastKickstartDatabasePath != "":
+					p("\t" + blastKickstartDatabasePath)
 
 	configPaths = [os.path.join(sys.prefix, "share", "metastudent", "metastudentrc.default"),
 				"/etc/metastudentrc",
@@ -600,9 +714,10 @@ if __name__ == "__main__":
 			os.mkdir(configMap["TMPDIR"])
 		tempfile.tempdir=configMap["TMPDIR"]
 	
-	if not os.path.isdir(configMap.get('DATABASE_BASE_PATH')):
-		print >> sys.stderr,"Error: DATABASE_BASE_PATH (%s) does not exist." % configMap.get('DATABASE_BASE_PATH')
+	if not os.path.isdir(configMap.get('DATABASE_3_BASE_PATH')):
+		print >> sys.stderr,"Error: DATABASE_3_BASE_PATH (%s) does not exist." % configMap.get('DATABASE_3_BASE_PATH')
 		sys.exit(1);
+
 	
 	numSeqs = len([None for line in open(inputFastaFilePath).read().split("\n") if line.startswith(">")])
 	if numSeqs != 1 and withImages:
@@ -622,12 +737,12 @@ metastudent - predictor of gene ontology terms from protein sequence
 
 =head1 SYNOPSIS
 
-metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--debug] [--keep-temp] [--silent] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=I<MFO or BPO or MFO,BPO>] [--blast-kickstart-databases=I<BLAST_RESULT_FILE(S)>] [--temp-dir=I<DIR>] [--config=I<CONFIG_FILE>]
+metastudent -i I<FASTA_FILE> -o I<RESULT_FILE_PREFIX> [--debug] [--keep-temp] [--silent] [--output-blast] [--blast-only] [--all-predictions] [--ontologies=I<MFO or BPO or CCO or MFO,BPO or ...>] [--with-images] [--blast-kickstart-databases=I<BLAST_RESULT_FILE(S)>] [--temp-dir=I<DIR>] [--config=I<CONFIG_FILE>]
 !!! Make sure your fasta file contains at most 500 sequences !!!
 
 =head1 DESCRIPTION
 
-Metastudent predicts Gene Ontology (GO) terms from the Molecular Function Ontology (MFO) and Biological Process Ontology (BPO)
+Metastudent predicts Gene Ontology (GO) terms from the Molecular Function Ontology (MFO), Biological Process Ontology (BPO) and Cellular Component Ontology (CCO)
 for input protein sequences by homology-based inference from already annotated proteins.
 
 Large (1 GB in total) data files necessary for the operation of metastudent are downloaded automatically on the first use of the program.  The download is restartable.  You can also make an explicit call to
@@ -692,9 +807,9 @@ Whether to exclude the actual GO term names as a column in the output prediction
 
 Whether to also generate an image that displays the predicted GO terms as a GO graph. This option can only be used with exactly one input sequence and only when connected to the internet.
 
-=item --ontologies=I<MFO or BPO or MFO,BPO>
+=item --ontologies=I<MFO or BPO or CCO or MFO,BPO or ...>
 
-A comma separated list of ontologies to create predictions for. Default is MFO,BPO. If used in combination with B<--blast-kickstart-databases>, the number and order of the ontologies must correspond to the kickstart files.
+A comma separated list of ontologies to create predictions for. Default is MFO,BPO,CCO. If used in combination with B<--blast-kickstart-databases>, the number and order of the ontologies must correspond to the kickstart files.
 
 =item --blast-kickstart-databases=<BLAST_RESULT_FILES>
 

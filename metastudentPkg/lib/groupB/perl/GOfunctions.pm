@@ -103,7 +103,7 @@ sub goFilter {
 
         my @split = split(/\t/,$goterm[$nr -1]);
         
-        if($split[2] eq 'molecular_function' || $split[2] eq 'biological_process') {
+        if($split[2] eq 'molecular_function' || $split[2] eq 'biological_process' || $split[2] eq 'cellular_component') {
             
             push(@gofiltered,$go);
         }

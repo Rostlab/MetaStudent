@@ -45,6 +45,18 @@ class blastallParameters:
 		
 	def getJ(self):
 		return self.j
+	
+	def setB(self, value):
+		self.B = value
+		
+	def getB(self):
+		return self.B
+	
+	def setV(self, value):
+		self.v = value
+		
+	def getV(self):
+		return self.v
 		
 
 def createBlastPGPCommand(blastParameters):
@@ -54,6 +66,8 @@ def createBlastPGPCommand(blastParameters):
 		" -d " + blastParameters.getBlastDatabasePath() + \
 		" -e " + str(blastParameters.getEValue()) + \
 		" -j " + str(blastParameters.getJ()) + \
+		" -b " + str(blastParameters.getB()) + \
+		" -v " + str(blastParameters.getV()) + \
 		" 1>" + blastParameters.getOutputFilePath()+".out" + \
 		" 2>" + blastParameters.getOutputFilePath()+".err"
 

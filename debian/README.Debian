@@ -1,5 +1,5 @@
 metastudent for Debian
 ======================
-metastudent requires large databases (~400M compressed) for operation. These are available from [1], and are released under the GPL-2+. metastudent automatically downloads these databases from [1], in case they are not yet present on the host machine.
+metastudent requires large databases (>1GB compressed) for operation. These are available from [1], and are released under the GPL-2+. metastudent automatically downloads these databases from [1], in case they are not yet present on the host machine.
 
 [1] ftp://rostlab.org/metastudent/metastudent-data_[0-9.]+.tar.gz

@@ -112,7 +112,7 @@ public class Relations {
 			return true;				// no idea why it is missing in goterm.txt
 		}
 		String tmp = type.get(goterm);
-		if(tmp.equals("biological_process") || tmp.equals("molecular_function")) {
+		if(tmp.equals("biological_process") || tmp.equals("molecular_function") || tmp.equals("cellular_component")) {
 			return true;
 		} else if (!noCC && tmp.equals("cellular_component")){
 			return true;

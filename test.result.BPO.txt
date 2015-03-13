@@ -1,30 +1,25 @@
-0000	GO:0006310	0.29
-0000	GO:0006281	0.29
-0001	GO:0030321	0.08
-0001	GO:0007588	0.08
-0001	GO:0055085	0.09
-0001	GO:0050910	0.08
-0001	GO:0006813	0.35
-0001	GO:0070634	0.08
-0001	GO:0007268	0.08
-0001	GO:0001822	0.08
-0001	GO:0006814	0.35
-0001	GO:0006884	0.14
-0001	GO:0048878	0.08
-0001	GO:0030001	0.21
-0001	GO:0015696	0.08
-0001	GO:0009792	0.08
-0001	GO:0051452	0.08
-0001	GO:0001525	0.19
-0001	GO:0015672	0.21
-0002	GO:0010150	0.09
-0002	GO:0010200	0.10
-0002	GO:0030154	0.09
-0002	GO:0009867	0.09
-0002	GO:0009793	0.09
-0002	GO:0050832	0.09
-0002	GO:0010187	0.09
-0002	GO:0006950	0.11
-0002	GO:0045449	0.18
-0002	GO:0009409	0.09
-0002	GO:0006350	0.20
+0000 bla	GO:0090304	0.53	nucleic acid metabolic process
+0000 bla	GO:0071704	0.53	organic substance metabolic process
+0000 bla	GO:0009987	0.53	cellular process
+0000 bla	GO:0008152	0.53	metabolic process
+0000 bla	GO:0044237	0.53	cellular metabolic process
+0000 bla	GO:0043170	0.53	macromolecule metabolic process
+0000 bla	GO:0034641	0.39	cellular nitrogen compound metabolic process
+0000 bla	GO:0006807	0.39	nitrogen compound metabolic process
+0000 bla	GO:1901360	0.39	organic cyclic compound metabolic process
+0000 bla	GO:0006139	0.39	nucleobase-containing compound metabolic process
+0000 bla	GO:0044710	0.39	single-organism metabolic process
+0000 bla	GO:0044260	0.39	cellular macromolecule metabolic process
+0000 bla	GO:0044699	0.39	single-organism process
+0000 bla	GO:0006281	0.39	DNA repair
+0000 bla	GO:0006725	0.39	cellular aromatic compound metabolic process
+0000 bla	GO:0051716	0.39	cellular response to stimulus
+0000 bla	GO:0006974	0.39	cellular response to DNA damage stimulus
+0000 bla	GO:0006950	0.39	response to stress
+0000 bla	GO:0046483	0.39	heterocycle metabolic process
+0000 bla	GO:0006310	0.39	DNA recombination
+0000 bla	GO:0044238	0.39	primary metabolic process
+0000 bla	GO:0050896	0.39	response to stimulus
+0000 bla	GO:0033554	0.39	cellular response to stress
+0000 bla	GO:0006259	0.39	DNA metabolic process
+0000 bla	GO:0090305	0.25	nucleic acid phosphodiester bond hydrolysis

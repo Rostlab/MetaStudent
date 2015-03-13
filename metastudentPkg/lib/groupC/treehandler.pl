@@ -76,7 +76,7 @@ sub create_graph {
     while( <FHE> )
     {
     	my @line = split( /\s+/, $_ );
-    	push( @{$graph{$line[2]}}, $line[0] );
+    	push( @{$graph{$line[0]}}, $line[1] );
     }
     close FHE;
     return \%graph;
@@ -147,52 +147,63 @@ sub print_confidence {
         return 0;
     }
 
-    foreach (@input) {
-        if (/^Target: (.*)/) { # match target names, and recognize GO terms if any 
-	    $targetname = $1;
-            if ($targetname =~ m/GO:/) {
-                foreach (split(',', $targetname)) {
-                    if (exists $$graph{$_}) {
+    foreach (@input) 
+    {
+        if (/^Target: (.*)/) # match target names, and recognize GO terms if any 
+        { 
+		    $targetname = $1;
+            if ($targetname =~ m/GO:/) 
+            {
+                foreach (split(',', $targetname)) 
+                {
+                    if (exists $$graph{$_}) 
+                    {
                         $targetgos{$_} = 1;
                     }
                 }
 
                 # get parents of target GO terms
-                foreach (keys(%targetgos)) {
-                    if (exists $$graph{$_}) {
-                        foreach (get_parents($graph, $_)) {
+                foreach (keys(%targetgos)) 
+                {
+                    if (exists $$graph{$_}) 
+                    {
+                        foreach (get_parents($graph, $_)) 
+                        {
                             $targetgos{$_->acc} = 1;
                         }
                     }
                 }
             }
         }
-        else {
+        else 
+        {
             my @sp = split('\s+|\t+');
             my @gos = split( ',', $sp[5] );
     
 	    
             my @scrs = split( '/', $sp[3] );
             my @idents = split('/', $sp[2]);
-	    my $scr = 0;
-	    if ($scoring == '0')
-	    {
-	       $scr = $scrs[0] / $scrs[1];
-	    }
-	    else
-	    {
-	      $scr = $idents[0] / $idents[1];
-	    }
+		    my $scr = 0;
+		    if ($scoring == '0')
+		    {
+		       $scr = $scrs[0] / $scrs[1];
+		    }
+		    else
+		    {
+		      $scr = $idents[0] / $idents[1];
+		    }
 
-    
-            foreach (@gos) {
+            foreach (@gos) 
+            {
                 # check if node is present in the current tree, update positive score and support for each direct hit
-                if ( exists $graph->{$_} ) {
+                if ( exists $graph->{$_} ) 
+                {
                     $go2single_score{$_} = $scr if (not $go2single_score{$_} or $scr > $go2single_score{$_});
                     $go2single_support{$_}++;
                     $go2direct_pred{$_} = $_ if (not $go2direct_pred{$_});
                 }
-                else {
+                else 
+                {
                     logprint(1, "info: $_ not found in current tree.\n");
                 }
             }
@@ -325,8 +336,11 @@ my $file;
 my $graph;
 my $file_mfo;
 my $file_bpo;
+my $file_cco;
 my $graph_mfo;
 my $graph_bpo;
+my $graph_cco;
+
 
 # read graph(s)
 if ($opts{'-i'}) {
@@ -336,7 +350,8 @@ if ($opts{'-i'}) {
 if ($opts{'-mfo'} and $opts{'-bpo'}) {
     $file_mfo    = $opts{'-mfo'} or die(print_usage);
     $file_bpo    = $opts{'-bpo'} or die(print_usage);
-
+    $file_cco    = $opts{'-cco'} or die(print_usage);
+    
     print STDERR "parsing tree $file_mfo (1/1)...";
     $graph_mfo   = create_graph($file_mfo);
 

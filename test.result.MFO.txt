@@ -1,31 +1,16 @@
-0001	GO:0015203	0.00
-0001	GO:0015189	0.08
-0001	GO:0015181	0.02
-0001	GO:0015234	0.08
-0001	GO:0042605	0.03
-0001	GO:0000064	0.07
-0001	GO:0051739	0.13
-0001	GO:0005291	0.05
-0001	GO:0015378	0.12
-0001	GO:0015379	0.34
-0001	GO:0042945	0.05
-0001	GO:0042802	0.07
-0001	GO:0015377	0.14
-0001	GO:0022893	0.05
-0001	GO:0015194	0.06
-0001	GO:0015193	0.07
-0001	GO:0005289	0.06
-0001	GO:0019534	0.09
-0001	GO:0015226	0.05
-0001	GO:0015489	0.09
-0001	GO:0015327	0.03
-0001	GO:0015326	0.09
-0001	GO:0008511	0.13
-0001	GO:0015179	0.11
-0001	GO:0005515	0.32
-0001	GO:0015174	0.07
-0001	GO:0015175	0.03
-0001	GO:0015171	0.21
-0002	GO:0003677	0.22
-0002	GO:0003723	0.22
-0002	GO:0008270	0.22
+0000 bla	GO:0004518	0.49	nuclease activity
+0000 bla	GO:0016787	0.48	hydrolase activity
+0000 bla	GO:0016788	0.48	hydrolase activity, acting on ester bonds
+0000 bla	GO:0097159	0.38	organic cyclic compound binding
+0000 bla	GO:0005488	0.38	binding
+0000 bla	GO:0003676	0.38	nucleic acid binding
+0000 bla	GO:1901363	0.38	heterocyclic compound binding
+0000 bla	GO:0003824	0.19	catalytic activity
+0000 bla	GO:0004372	0.03	glycine hydroxymethyltransferase activity
+0000 bla	GO:0043169	0.03	cation binding
+0000 bla	GO:0000287	0.03	magnesium ion binding
+0000 bla	GO:0043167	0.03	ion binding
+0000 bla	GO:0016742	0.03	hydroxymethyl-, formyl- and related transferase activity
+0000 bla	GO:0016740	0.03	transferase activity
+0000 bla	GO:0016741	0.03	transferase activity, transferring one-carbon groups
+0000 bla	GO:0046872	0.03	metal ion binding

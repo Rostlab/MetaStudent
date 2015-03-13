@@ -11,8 +11,8 @@ use File::chdir;
 print "-> working directory: ", cwd(), "\n";
 
 # kNN parameters
-my $closure = "data/fullTransitiveClosureGO.txt";
-my $goterms = "data/goterm.txt";
+my $closure = "data/transitiveClosure2014.txt";
+my $goterms = "data/goterm2014.txt";
 my $distribution = "data/weighted.dist";
 
 
@@ -198,6 +198,8 @@ my $recall = -1;
 
 (my $do_evaluation, my $number_targets) = &prepare_evaluation($targets);
 
+$do_evaluation=0;
+
 if($do_evaluation)
 {
 	print "-> performing on-the-fly evaluation...\n";
@@ -212,7 +214,7 @@ if($do_evaluation)
 	}
 
 	# run evaluation
-	my @cmd = qq(cd ../perl; cat $outfile_path.raw.leaves | perl evaluate.pl -g ../data/goterm.txt -t ../data/goterm2term.txt -i -n 1 -p x $honest);
+	my @cmd = qq(cd ../perl; cat $outfile_path.raw.leaves | perl evaluate.pl -g ../data/goterm2014.txt -t ../data/goterm2term.txt -i -n 1 -p x $honest);
 	my $eval_out = `@cmd`; if($?){ confess("@cmd failed: ".($?>>8)); }
 	
 	my @lines = split(/\n/, $eval_out);

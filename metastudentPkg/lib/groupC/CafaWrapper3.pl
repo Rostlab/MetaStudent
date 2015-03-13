@@ -11,7 +11,7 @@ my $tmpDir = $ARGV[3];
 my @cmd = qq|./exercise3.pl $database $tmpDir/blast.out|;
 system(@cmd) && confess("@cmd failed: ".($?>>8));
 
-@cmd = qq|./treehandler.pl -mfo fullTransitiveClosureGO.txt -bpo fullTransitiveClosureGO.txt -method 3 -pred $tmpDir/blast.out -scoring $scoring|;
+@cmd = qq|./treehandler.pl -mfo transitiveClosure2014.txt -bpo transitiveClosure2014.txt -cco transitiveClosure2014.txt -method 3 -pred $tmpDir/blast.out -scoring $scoring|;
 my $peterput=`@cmd`;
 if($?){ confess("@cmd failed: ".($?>>8)); }
 

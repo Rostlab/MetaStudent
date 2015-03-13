@@ -61,7 +61,7 @@ public abstract class Selector
 		
 		for(String s : list){
 			if(tree.getCategory(s).equals(GoTree.biolproc)) biol.add(s);
-//			if(tree.getCategory(s).equals(GoTree.cellcomp)) cell.add(s);
+			if(tree.getCategory(s).equals(GoTree.cellcomp)) cell.add(s);
 			if(tree.getCategory(s).equals(GoTree.molfunction)) mol.add(s);			
 		}
 		

@@ -8,133 +8,42 @@ import os
 import commands
 from Logger import Logger
 from BlastWrapper import blastallParameters, createBlastPGPCommand
+from metastudentPkg.commons import p, splitBigFastaFile
 import sys
-
-silent=False
-whiteSpaceCode = "~"
-
-
-def setSilent(val):
-	global silent
-	silent=val
-
-def isSilent():
-	global silent
-	return silent
-
-def p(string):
-	if not silent:
-		print string
-
-def getPkgPath():
-	myPath=""
-	if hasattr(sys, "frozen"):
-		myPath = os.path.dirname(unicode(sys.executable, sys.getfilesystemencoding( )))
-	else:
-		myPath = os.path.dirname(os.path.abspath(__file__))
-	return myPath
-
-def encodeFastaHeaders(fastaFilePath):
-	fastaFile = open(fastaFilePath)
-	fileContent = fastaFile.read().rstrip("\n")
-	fastaFile.close()
-	if fileContent == "":
-		Logger.log("Error: empty fasta file")
-		raise
-	
-	lines = fileContent.split("\n")
-	newLines = []
-	i=0
-
-	for line in lines:
-		if line.startswith(">"):
-			newLines.append(line.replace(" ", whiteSpaceCode).replace("\t", whiteSpaceCode))
-		else:
-			newLines.append(line)
-	
-	fastaFile = open(fastaFilePath,'w')
-	fastaFile.write("\n".join(newLines))
-	fastaFile.close()
-	
-def decodeFastaHeader(fastaHeader):
-	return fastaHeader.replace(whiteSpaceCode, " ")
-
-#preserves order of sequences
-def splitBigFastaFile(fastaFilePath, tmpDir, splitSize): 
-	
-	fastaSplitFolder = os.path.join(tmpDir, "fasta_splits")
-	if not os.path.exists(fastaSplitFolder):
-		os.mkdir(fastaSplitFolder)
-	
-	fastaFile = open(fastaFilePath)
-	fileContent = fastaFile.read().rstrip("\n")
-	fastaFile.close()
-	if fileContent == "":
-		Logger.log("Error: empty fasta file")
-		raise
-	
-	fastaFilePaths=[]
-	lines = fileContent.split("\n")
-	i=0
-	numEntries=0
-	fileCount=0
-	currFileLines=[]
-	
-	while True:
-		currHeader=""
-		while(currHeader=="") and i<len(lines):
-			if lines[i].startswith(">"):
-				currHeader=lines[i]
-			i+=1	
-
-		currSequence = ""
-		while i<len(lines) and not lines[i].startswith(">"):
-			if lines[i][0].isalpha():
-				currSequence += lines[i].replace(" ","").replace("\t","")
-			i+=1
-		currSequence.replace("\n","")
-		
-		currFileLines.append(currHeader+"\n")
-		currFileLines.append(currSequence + "\n")
-	
-		numEntries += 1
-		if numEntries % splitSize == 0 or i == len(lines):
-			newFastaFilePath = os.path.join(fastaSplitFolder,"split_%d.fasta" % (fileCount))
-			fastaFilePaths.append(newFastaFilePath)
-			currFile = open(newFastaFilePath, 'w')
-			currFile.write("".join(currFileLines))
-			currFileLines = []
-			currFile.close()
-			fileCount += 1
-			
-		if i == len(lines):
-			break
-	
-	return fastaFilePaths
+import shlex
+import subprocess
+import time
 
 
 def runBlast(inputFilePath, blastDatabasePath, outputFilePath, tmpDir, eValue, iters, configMap):
 	
 	fastaSplits = splitBigFastaFile(inputFilePath, tmpDir, configMap["FASTA_SPLIT_SIZE"])
 
-	for fastaSplit in fastaSplits:
+	for i, fastaSplit in enumerate(fastaSplits):
 		blastParas = blastallParameters()
 		blastParas.setBlastExePath(configMap["BLASTPGP_EXE_PATH"])
 		blastParas.setBlastDatabasePath(blastDatabasePath)
 		blastParas.setEValue(eValue)
 		blastParas.setJ(iters)
+		blastParas.setB(1000)
+		blastParas.setV(1000)
 		blastParas.setInputFilePath(fastaSplit)
 		blastParas.setOutputFilePath(fastaSplit+".blast")
 		
 		blastCommand = createBlastPGPCommand(blastParas)
+		#print blastCommand
 		
-		s, o = commands.getstatusoutput(blastCommand)
-		if s != 0:
-			Logger.log("!!!Error!!! " + blastCommand)
-			Logger.log(s)
-			Logger.log(o)
-			raise Exception
+# 		executeCommandInSGELocalAsync(blastCommand, "blast_%d" % i, tmpDir)
+# 		
+# 	executeCommandInSGELocalAsyncJoin()
 		
+ 		s, o = commands.getstatusoutput(blastCommand)
+ 		if s != 0:
+ 			Logger.log("!!!Error!!! " + blastCommand)
+ 			Logger.log(s)
+ 			Logger.log(o)
+ 			raise Exception
+ 		
 	p("Merging Blast Output")
 #	allRoundSplits = ["" for bla in range(int(NUMBER_OF_ITERATIONS))]
 	bigOutputFile = open(outputFilePath,'w')

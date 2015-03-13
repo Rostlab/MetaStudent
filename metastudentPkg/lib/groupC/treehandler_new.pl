@@ -325,24 +325,32 @@ my $file;
 my $graph;
 my $file_mfo;
 my $file_bpo;
+my $file_cco;
 my $graph_mfo;
 my $graph_bpo;
+my $graph_cco;
 
 # read graph(s)
 if ($opts{'-i'}) {
     $file = $opts{'-i'} or die(print_usage);
     $graph   = create_graph($file);
 }
-if ($opts{'-mfo'} and $opts{'-bpo'}) {
+if ($opts{'-mfo'} and $opts{'-bpo'} and $opts{'-cco'}) {
     $file_mfo    = $opts{'-mfo'} or die(print_usage);
     $file_bpo    = $opts{'-bpo'} or die(print_usage);
+    $file_cco    = $opts{'-cco'} or die(print_usage);
 
-    print STDERR "parsing tree $file_mfo (1/2)...";
+    print STDERR "parsing tree $file_mfo (1/3)...";
     $graph_mfo   = create_graph($file_mfo);
 
     print STDERR "done\n";
-    print STDERR "parsing tree $file_bpo (2/2)...";
+    
+    print STDERR "parsing tree $file_bpo (2/3)...";
     $graph_bpo   = create_graph($file_bpo);
+    print STDERR "done\n";
+    
+    print STDERR "parsing tree $file_cco (3/3)...";
+    $graph_bpo   = create_graph($file_cco);
     print STDERR "done\n";
 }
 

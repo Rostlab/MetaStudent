@@ -38,16 +38,16 @@ Copyright: 2010, Dominik Achten
 License: GPL-2+
 
 Files: metastudent
-Copyright: 2012-2013 Tobias Hamp <hampt@rostlab.org>
+Copyright: 2012-2015 Tobias Hamp <hampt@rostlab.org>
 License: GPL-2+
 
 Files: debian/*
-Copyright: 2011-2013, Tobias Hamp <hampt@rostlab.org>
-           2013, Laszlo Kajan <lkajan@debian.org>
+Copyright: 2011-2015, Tobias Hamp <hampt@rostlab.org>
+           2013-2015, Laszlo Kajan <lkajan@debian.org>
 License: GPL-2+
 
 Files: *
-Copyright: 2010-2013, Tobias Hamp <hampt@rostlab.org>
+Copyright: 2010-2015, Tobias Hamp <hampt@rostlab.org>
 License: GPL-2+
 
 License: GPL-2+

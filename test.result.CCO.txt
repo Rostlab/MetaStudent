@@ -1,0 +1,5 @@
+0000 bla	GO:0005737	0.60	cytoplasm
+0000 bla	GO:0044424	0.60	intracellular part
+0000 bla	GO:0044464	0.60	cell part
+0000 bla	GO:0005623	0.60	cell
+0000 bla	GO:0005622	0.60	intracellular

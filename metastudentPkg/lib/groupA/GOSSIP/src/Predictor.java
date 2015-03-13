@@ -128,16 +128,23 @@ public class Predictor
 		String actGo = "";
 		for(int i = 0; i < lines.length; i++)
 		{	
-			//System.out.println(lines[i]);
-			if(   (Constants.NUM_BLAST_ITERATIONS==1 && lines[i].startsWith("Searching")) || (Constants.NUM_BLAST_ITERATIONS>1 && lines[i].startsWith("Results from round " + Constants.NUM_BLAST_ITERATIONS))   )
+			if(   (Constants.NUM_BLAST_ITERATIONS==1 && lines[i].startsWith("Searching")) || (Constants.NUM_BLAST_ITERATIONS>1 && lines[i].startsWith("Results from round "))   )
 			{	
+				selector.gos.clear();
+				selector.length.clear();
+				selector.blastScores.clear();
+				selector.eValues.clear();
+				selector.identity.clear();
+				selector.positives.clear();
+				selector.gaps.clear();
+				
+				//System.out.println("READING");
 				read = true;
 			}
 			if(read){
-				//System.out.println(lines[i]);
 				if(lines[i].startsWith(">") && lines[i].contains("|")  ){
 					lines[i] = lines[i].split("\\|")[1];
-					//System.out.println(lines[i]);
+					//System.out.println("HITT");
 					go = true;
 					actGo = "";
 				}

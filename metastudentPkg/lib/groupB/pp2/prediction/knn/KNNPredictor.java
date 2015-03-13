@@ -32,7 +32,7 @@ public class KNNPredictor {
 		
 		String closureFile = null;
 		String termFile = null;
-		boolean noCellularComponent = true;
+		boolean noCellularComponent = false;
 		
 		//String hitFile = "examples/blast_results_all.blast";
 		//String outFile = "examples/prediction_out1";
@@ -69,8 +69,8 @@ public class KNNPredictor {
 			}
 			else if(args[i].equals("-nofilter"))
 				eliminateDuplicateHits = false;
-			else if(args[i].equals("-cc"))
-				noCellularComponent = false;
+//			else if(args[i].equals("-cc"))
+//				noCellularComponent = false;
 			else
 				System.out.println(usage);
 		}

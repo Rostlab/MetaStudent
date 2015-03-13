@@ -53,6 +53,8 @@ public class ParseGONew {
 			String link = templine[3];
 			String relation = templine[1];
 			
+			System.out.println(line);
+			
 			if(relation.equals("OBO_REL:is_a") || relation.equals("part_of")){
 			
 				if (!goTerms.contains(go)){
@@ -74,11 +76,11 @@ public class ParseGONew {
 					LinkedList<String> firstParent = new LinkedList<String>();
 					firstParent.add(parent);
 					
-					if(link.equals("asserted")){
+					if(link.equals("1")){
 						directParents.add(firstParent);
 						allPar+= (parent + ",");
 					}
-					if(link.equals("implied")){
+					if(!link.equals("1")){
 						allPar+= (parent + ",");
 					}
 				}
@@ -96,7 +98,7 @@ public class ParseGONew {
 						rootTerms.add("cel_comp");
 					}
 	
-					if(link.equals("asserted")){
+					if(link.equals("1")){
 						LinkedList<String> inDirParent = directParents.get(index);
 							inDirParent.add(parent);
 							directParents.remove(index);
@@ -137,7 +139,7 @@ public class ParseGONew {
 	private void createOutputString(){
 		
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter("GO_Parents.txt"));
+			BufferedWriter writer = new BufferedWriter(new FileWriter("/mnt/home/hampt/workspace/metastudent_debian_trunk/metastudentPkg/lib/groupA/GO_Parser/GO_Parents.2014.txt"));
 			String out = "";
 			for(int i = 0; i< goTerms.size(); i++){
 				out = (goTerms.get(i) + "\t" + allParents.get(i) + "\t" + maxPath.get(i) + "\t" + rootTerms.get(i) + "\n");

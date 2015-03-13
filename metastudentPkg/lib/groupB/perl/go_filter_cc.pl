@@ -15,6 +15,7 @@ while(my $line = <TERM>) {
 
 	$terms{$goterm} = 1 if $type eq "biological_process";
 	$terms{$goterm} = 1 if $type eq "molecular_function";	
+	$terms{$goterm} = 1 if $type eq "cellular_component";	
 }
 
 while (my $line = <STDIN>) {
