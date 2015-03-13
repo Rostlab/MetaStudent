@@ -39,8 +39,6 @@ import urllib2
 configMap=None
 metastudentPath=""
 metastudentPkgPath=""
-dataPkgPath=""
-dataPkg2Path=""
 dataPkg3Path=""
 
 def usage():
@@ -261,8 +259,6 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 def formatPath(path):
 	return path.replace("<ms-path>",metastudentPath) \
 		.replace("<pkg-path>", metastudentPkgPath) \
-		.replace("<default-data-package-path>", dataPkgPath) \
-		.replace("<default-data-package-2-path>", dataPkg2Path) \
 		.replace("<default-data-package-3-path>", dataPkg3Path) \
 		.replace("<python-package-path>", metastudentPkgPath)
 
@@ -307,10 +303,6 @@ def readConfigFile(configMap, configPath):
                         else:   
                                 print >> sys.stderr,"Wrong argument for option JAR_INSTALL_FOLDER_PATH"
                                 sys.exit(1)
-		if config.has_option('General', "DATABASE_BASE_PATH"):
-			configMap["DATABASE_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_BASE_PATH'))
-		if config.has_option('General', "DATABASE_2_BASE_PATH"):
-			configMap["DATABASE_2_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_2_BASE_PATH'))
 		if config.has_option('General', "DATABASE_3_BASE_PATH"):
 			configMap["DATABASE_3_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_3_BASE_PATH'))
 		if config.has_option('General', "FASTA_SPLIT_SIZE"):
@@ -580,8 +572,6 @@ if __name__ == "__main__":
 	else:
 		metastudentPath = os.path.dirname(os.path.abspath(__file__))
 	metastudentPkgPath=getPkgPath()
-	dataPkgPath=os.path.join(sys.prefix, "share", "metastudent-data")
-	dataPkg2Path=os.path.join(sys.prefix, "share", "metastudent-data-2")
 	dataPkg3Path=os.path.join(sys.prefix, "share", "metastudent-data-3")
 
 	if commands.getstatusoutput('pp_popcon_cnt -p metastudent')[0] != 0:

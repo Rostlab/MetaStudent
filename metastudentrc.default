@@ -1,8 +1,6 @@
 [General]
 MYNAME=metastudent
 TMPDIR=/tmp/
-DATABASE_BASE_PATH=<default-data-package-path>/dataset_201401
-DATABASE_2_BASE_PATH=<default-data-package-2-path>/dataset_201401
 DATABASE_3_BASE_PATH=<default-data-package-3-path>/dataset_201401
 BLASTPGP_EXE_PATH=/usr/bin/blastpgp
 FASTA_SPLIT_SIZE=5
