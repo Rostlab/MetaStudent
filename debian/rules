@@ -14,7 +14,7 @@ override_dh_auto_clean:
 override_dh_auto_install:
 	dh_auto_install
 	find debian/metastudent -regex ".*/knn_weighted\|.*/CafaWrapper1\.pl\|.*/CafaWrapper2\.pl\|.*/CafaWrapper3\.pl\|.*/CafaWrapper3_new\.pl\|.*/exercise3\.pl\|.*/treehandler\.pl\|.*/validate\.pl" -exec chmod +x {} \;
-	find debian/metastudent -name "*.jar" -exec cp {} $(CURDIR)/debian/metastudent/usr/share/metastudent/
+	find debian/metastudent -name "*.jar" -exec cp {} $(CURDIR)/debian/metastudent/usr/share/metastudent/ \;
 
 # lkajan 20140106:
 # The jars in d/metastudent.jlibs are for use by this package only, and should not end up in /usr/share/java.
