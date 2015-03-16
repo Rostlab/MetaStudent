@@ -7,8 +7,16 @@ JAVA_HOME=/usr/lib/jvm/default-java
 %:
 	dh $@ --with javahelper
 
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f metastudent.1
+
 override_dh_auto_install:
 	dh_auto_install
-	find . -regex ".*/knn_weighted\|.*/CafaWrapper1\.pl\|.*/CafaWrapper2\.pl\|.*/CafaWrapper3\.pl\|.*/CafaWrapper3_new\.pl\|.*/exercise3\.pl\|.*/treehandler\.pl\|.*/validate\.pl" -exec chmod +x {} \;
+	find debian/metastudent -regex ".*/knn_weighted\|.*/CafaWrapper1\.pl\|.*/CafaWrapper2\.pl\|.*/CafaWrapper3\.pl\|.*/CafaWrapper3_new\.pl\|.*/exercise3\.pl\|.*/treehandler\.pl\|.*/validate\.pl" -exec chmod +x {} \;
+	mv *.jar $(CURDIR)/debian/metastudent/usr/share/metastudent/
 
-#	chmod +x tmp/usr/s
+# lkajan 20140106:
+# The jars in d/metastudent.jlibs are for use by this package only, and should not end up in /usr/share/java.
+override_jh_installlibs:
+	exit 0;
