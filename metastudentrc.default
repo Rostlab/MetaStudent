@@ -4,6 +4,7 @@ TMPDIR=/tmp/
 DATABASE_3_BASE_PATH=<default-data-package-3-path>/dataset_201401
 BLASTPGP_EXE_PATH=/usr/bin/blastpgp
 FASTA_SPLIT_SIZE=5
+JAR_INSTALL_FOLDER_PATH=/usr/share/metastudent
 GROUP_A_PATH=<python-package-path>/lib/groupA/GOSSIP
 GROUP_B_PATH=<python-package-path>/lib/groupB/run
 GROUP_C_PATH=<python-package-path>/lib/groupC
