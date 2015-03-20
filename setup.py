@@ -20,18 +20,6 @@ if childP.poll() != 0:
 	print >> sys.stderr, "Stderr: %s" % (stderr)
 	sys.exit(1)
 
-
-print 'Compressing upstream changelog...'
-compressedChangelogfile = open("changelog.gz", 'w')
-childP = Popen(["gzip", "-9", "-c", "ChangeLog"], stdout=compressedChangelogfile, stderr=PIPE)
-stdout, stderr = childP.communicate()
-if childP.poll() != 0:
-	print >> sys.stderr, "Error: pod2man failed"
-	print >> sys.stderr, "Stdout: %s" % (stdout)
-	print >> sys.stderr, "Stderr: %s" % (stderr)
-	sys.exit(1)
-compressedChangelogfile.close()
-	
 	
 pkgPath=getPkgPath()
 dataFiles=[]
@@ -109,7 +97,6 @@ setup (name = 'metastudent',
        scripts = ["metastudent"],
        data_files =[	("share/metastudent", ["metastudentrc.default"]),
 			("share/doc/metastudent/examples", ["test.fasta","test.result.BPO.txt","test.result.MFO.txt","test.result.CCO.txt"]),
-			("share/doc/metastudent", ["ChangeLog"]),
 			("share/man/man1", ["metastudent.1"])
 		   ],
        packages = ['metastudentPkg'],
