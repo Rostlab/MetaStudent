@@ -1,4 +1,4 @@
-metastudent (2.0.0) UNRELEASED; urgency=low
+metastudent (2.0.0) unstable; urgency=low
 
   * Added Cellular Component Ontology
   * Updated GO annotations databases
