@@ -39,7 +39,7 @@ import urllib2
 configMap=None
 metastudentPath=""
 metastudentPkgPath=""
-dataPkg3Path=""
+dataPkgPath=""
 
 def usage():
 	print "metastudent -i <FASTA_FILE> -o <RESULT_FILE_PREFIX> [--silent] [--debug] [--keep-temp] [--output-blast] [--blast-only] [--all-predictions] [--no-names] [--with-images] [--ontologies=<MFO or BPO or CCO or MFO,BPO or ...>] [--blast-kickstart-databases=<BLAST_RESULT_FILE(S)>] [--temp-dir=<DIR>] [--config=<CONFIG_FILE>]\n!!! Make sure your input fasta file contains at most 500 sequences !!!"
@@ -158,9 +158,9 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 		
 		p("Loading Gene Ontology...")
 		try:
-			goTreeFilePath = os.path.join(configMap["DATABASE_3_BASE_PATH"], "goGraph.txt")	
-			closureFilePath = os.path.join(configMap["DATABASE_3_BASE_PATH"], "fullTransitiveClosureGO.txt")
-			nameMappingFilePath = os.path.join(configMap["DATABASE_3_BASE_PATH"], "nameMapping.txt")
+			goTreeFilePath = os.path.join(configMap["DATABASE_BASE_PATH"], "goGraph.txt")	
+			closureFilePath = os.path.join(configMap["DATABASE_BASE_PATH"], "fullTransitiveClosureGO.txt")
+			nameMappingFilePath = os.path.join(configMap["DATABASE_BASE_PATH"], "nameMapping.txt")
 			goConfig = GOConfig()
 			goConfig.setTreeFilePath(goTreeFilePath)
 			goConfig.setClosureFilePath(closureFilePath)
@@ -171,7 +171,7 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 		
 		for i, ontology in enumerate(ontologies):
 			
-			database = os.path.join(os.path.join(configMap["DATABASE_3_BASE_PATH"], ontology), configMap["BLAST_SRC_%s" % (ontology) ] + ".fasta")
+			database = os.path.join(os.path.join(configMap["DATABASE_BASE_PATH"], ontology), configMap["BLAST_SRC_%s" % (ontology) ] + ".fasta")
 			
 			suffix="_eval%s_iters%s_src%s.%s.blast" % (configMap["BLAST_EVAL_%s" % (ontology)], configMap["BLAST_ITERS_%s" % (ontology)], configMap["BLAST_SRC_%s" % (ontology)], ontology.lower())	
 			blastOutputFilePathLocal = fastaFilePathLocal+suffix
@@ -259,7 +259,7 @@ def runIt(tempfile, inputFastaFilePath, outputFilePath, outputBlast, blastKickst
 def formatPath(path):
 	return path.replace("<ms-path>",metastudentPath) \
 		.replace("<pkg-path>", metastudentPkgPath) \
-		.replace("<default-data-package-3-path>", dataPkg3Path) \
+		.replace("<default-data-package-path>", dataPkgPath) \
 		.replace("<python-package-path>", metastudentPkgPath)
 
 def readConfigFile(configMap, configPath):
@@ -303,8 +303,8 @@ def readConfigFile(configMap, configPath):
                         else:   
                                 print >> sys.stderr,"Wrong argument for option JAR_INSTALL_FOLDER_PATH"
                                 sys.exit(1)
-		if config.has_option('General', "DATABASE_3_BASE_PATH"):
-			configMap["DATABASE_3_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_3_BASE_PATH'))
+		if config.has_option('General', "DATABASE_BASE_PATH"):
+			configMap["DATABASE_BASE_PATH"]=formatPath(config.get('General', 'DATABASE_BASE_PATH'))
 		if config.has_option('General', "FASTA_SPLIT_SIZE"):
 			try:
 				configMap["FASTA_SPLIT_SIZE"]=int(config.get('General', 'FASTA_SPLIT_SIZE'))
@@ -572,7 +572,7 @@ if __name__ == "__main__":
 	else:
 		metastudentPath = os.path.dirname(os.path.abspath(__file__))
 	metastudentPkgPath=getPkgPath()
-	dataPkg3Path=os.path.join(sys.prefix, "share", "metastudent-data-3")
+	dataPkgPath=os.path.join(sys.prefix, "share", "metastudent-data")
 
 	if commands.getstatusoutput('pp_popcon_cnt -p metastudent')[0] != 0:
 		print >> sys.stderr, "The Rost Lab recommends you install the pp-popularity-contest package that provides pp_popcon_cnt:\n\nsudo apt-get install pp-popularity-contest\n"
@@ -707,8 +707,8 @@ if __name__ == "__main__":
 			os.mkdir(configMap["TMPDIR"])
 		tempfile.tempdir=configMap["TMPDIR"]
 	
-	if not os.path.isdir(configMap.get('DATABASE_3_BASE_PATH')):
-		print >> sys.stderr,"Error: DATABASE_3_BASE_PATH (%s) does not exist." % configMap.get('DATABASE_3_BASE_PATH')
+	if not os.path.isdir(configMap.get('DATABASE_BASE_PATH')):
+		print >> sys.stderr,"Error: DATABASE_BASE_PATH (%s) does not exist." % configMap.get('DATABASE_BASE_PATH')
 		sys.exit(1);
 
 	
