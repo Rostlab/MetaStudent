@@ -1,6 +1,13 @@
 metastudent 2.0
 
 Metastudent predicts GO terms for given amino acid sequences by joining the predictions of various individual classifiers, e.g. based on BLAST
+Metastudent predicts gene ontology (GO) terms for protein sequences through homology. It first runs a BLAST query for a given target against a custom BLAST database containing sequences and GO terms of previously annotated proteins. If a similar sequence is found, the output is used by three different base classifiers to calculate three separate sets of GO terms. Finally, a smart meta classifier converts them into one set. If there is no similar sequence in the BLAST database, no prediction is made. 
+
+<b> Development year: 2012
+
+<b> Authors: </b> Tobias Hamp, Laszlo Kajan </b>
+
+<b> References: </b> https://rostlab.org/owiki/index.php/Metastudent
 
 How to generate the distributable tar archive
 =============================================
