@@ -1,49 +1,46 @@
-NAME
+METASTUDENT - predictor of gene ontology terms from protein sequence
+--------------------------------------------------------------------
 
-       metastudent - predictor of gene ontology terms from protein sequence
-       
-       
+Metastudent predicts Gene Ontology (GO) terms from the Molecular
+Function Ontology (MFO) and Biological Process Ontology (BPO) for input
+protein sequences by homology-based inference from already annotated
+proteins.
+      
 DEVELOPMENT YEAR
+================
+2012
 
-      2012
+AUTHOR
+======
+Tobias Hamp <hampt@rostlab.org>
 
-SYNOPSIS
+How to install the package
+=============================================
+1) git clone https://github.com/Rostlab/MetaStudent.git
+2) cd MetaStudent
+3) sudo apt-get install pp-popularity-contest ( required during execution of the program )
+4) python setup.py install
+       
+How to generate the distributable tar archive
+=============================================
+$ setup.py sdist
 
-       metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
-       [--silent] [--output-blast] [--blast-only] [--all-predictions]
-       [--ontologies=MFO or BPO or MFO,BPO]
-       [--blast-kickstart-databases=BLAST_RESULT_FILE(S)] [--temp-dir=DIR]
-       [--config=CONFIG_FILE] !!! Make sure your fasta file contains at most
-       500 sequences !!!
+Running the Program
+===================
+metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
+[--silent] [--output-blast] [--blast-only] [--all-predictions]
+[--ontologies=MFO or BPO or MFO,BPO]
+[--blast-kickstart-databases=BLAST_RESULT_FILE(S)] [--temp-dir=DIR]
+[--config=CONFIG_FILE] !!! Make sure your fasta file contains at most
+500 sequences !!!
 
-DESCRIPTION
-
-       Metastudent predicts Gene Ontology (GO) terms from the Molecular
-       Function Ontology (MFO) and Biological Process Ontology (BPO) for input
-       protein sequences by homology-based inference from already annotated
-       proteins.
-
-       Large (1 GB in total) data files necessary for the operation of
-       metastudent are downloaded automatically on the first use of the
-       program.  The download is restartable.  You can also make an explicit
-       call to
-              metastudentdata (by default /usr/bin/metastudentdata) to
-       download the data files.  In case the data directory (by default
-       /usr/share/metastudent-data) is not writable and you are not root, the
-       operation is
-              reattempted with sudo(8).
-
-   Output format
-       For each selected ontology (see --ontologies), one output file is
-       produced (see -o).  Each line in each file associates a protein with a
-       GO term and a reliability for the association (0.0 to 1.0). The
-       following format is used: <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
-
-REFERENCES
-
-       Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten,
-       D., ... & Rost, B. (2013). Homology-based inference sets the bar high
-       for protein function prediction. BMC Bioinformatics, 14(Suppl 3), S7.
+Large (1 GB in total) data files necessary for the operation of
+metastudent are downloaded automatically on the first use of the
+program.  The download is restartable.  You can also make an explicit
+call to metastudentdata (by default /usr/bin/metastudentdata) to
+download the data files.  In case the data directory (by default
+/usr/share/metastudent-data) is not writable and you are not root, the
+operation is reattempted with sudo.
 
 OPTIONS
 
@@ -146,29 +143,28 @@ EXAMPLES
        the end).
             metastudent -i test.fasta -o test.result --ontologies=MFO,BPO --blast-kickstart-databases=test.result_eval0.001_iters3_srcexp.mfo.blast,
 
-AUTHOR
 
-       Tobias Hamp <hampt@rostlab.org>
+OUTPUT FORMAT
+=============
+For each selected ontology (see --ontologies), one output file is
+produced (see -o).  Each line in each file associates a protein with a
+GO term and a reliability for the association (0.0 to 1.0). The
+following format is used: <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
        
+
+REFERENCES
+==========
+Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten,
+D., ... & Rost, B. (2013). Homology-based inference sets the bar high
+for protein function prediction. BMC Bioinformatics, 14(Suppl 3), S7.
+
 MANPAGE
-       
-       http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
+=======       
+http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
        
 DOCUMENTATION
- 
-       https://rostlab.org/owiki/index.php/Metastudent
+============= 
+https://rostlab.org/owiki/index.php/Metastudent
  
 
-How to install the package
-=============================================
 
-Linux
-=====
-1) git clone https://github.com/Rostlab/MetaStudent.git
-2) cd MetaStudent
-3) sudo apt-get install pp-popularity-contest ( required during execution of the program )
-4) python setup.py install
-       
-How to generate the distributable tar archive
-=============================================
-$ setup.py sdist
