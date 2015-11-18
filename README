@@ -158,6 +158,16 @@ DOCUMENTATION
  
        https://rostlab.org/owiki/index.php/Metastudent
  
+
+How to install the package
+=============================================
+
+Linux
+=====
+1) git clone https://github.com/Rostlab/MetaStudent.git
+2) cd MetaStudent
+3) sudo apt-get install pp-popularity-contest ( required during execution of the program )
+4) python setup.py install
        
 How to generate the distributable tar archive
 =============================================
