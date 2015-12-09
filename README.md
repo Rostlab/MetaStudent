@@ -151,7 +151,7 @@ metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
            The metastudent configuration file, overrides
            <sysconfdir>/metastudentrc.
 
-## EXAMPLES
+### EXAMPLES
 
        The example test.fasta file can be found in <package_doc_dir>/examples
        (usually /usr/share/doc/metastudent/examples).
@@ -170,7 +170,7 @@ metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
             metastudent -i test.fasta -o test.result --ontologies=MFO,BPO 
             --blast-kickstart-databases=test.result_eval0.001_iters3_srcexp.mfo.blast,
 
-## OUTPUT FORMAT
+### OUTPUT FORMAT
 
        For each selected ontology (see --ontologies), one output file is produced (see -o). 
        Each line in each file associates a protein with a GO term and a reliability for
