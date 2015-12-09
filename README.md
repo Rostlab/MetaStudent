@@ -18,14 +18,19 @@ proteins.
 **Documentation:** https://rostlab.org/owiki/index.php/Metastudent
 
 ## Installation
-To install the Metastudent package, use the following commands:
+To install the Metastudent package, use the following commands. pp-popularity-contest is required during execution of the program which is explained in the steps:
 ```
 git clone https://github.com/Rostlab/MetaStudent.git
-clone the data repositories (to be updated)
 cd MetaStudent
 sudo apt-get install pp-popularity-contest ( required during execution of the program )
 python setup.py install
 ```
+Metastudent-Data is required for the execution of the program.
+
+```
+clone the data repositories (to be updated)
+```
+
 Make sure that the *blastpgp* program is available. You can download *blastpgp* from package *blast-2.2.26* for the corresponding platform from the following FTP: 
 ```
 ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST/
