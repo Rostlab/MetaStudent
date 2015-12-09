@@ -1,5 +1,4 @@
-# METASTUDENT
-## predictor of gene ontology terms from protein sequence
+# METASTUDENT (predictor of gene ontology terms from protein sequence)
 
 
 Metastudent predicts Gene Ontology (GO) terms from the Molecular
@@ -7,9 +6,7 @@ Function Ontology (MFO) and Biological Process Ontology (BPO) for input
 protein sequences by homology-based inference from already annotated
 proteins.
 
-## development year 
-
-2012
+* Development Year:  2012
 
 ## HOWTO Install
 
