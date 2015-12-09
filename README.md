@@ -22,7 +22,7 @@ To install the Metastudent package, use the following commands. pp-popularity-co
 ```
 git clone https://github.com/Rostlab/MetaStudent.git
 cd MetaStudent
-sudo apt-get install pp-popularity-contest ( required during execution of the program )
+sudo apt-get install pp-popularity-contest
 python setup.py install
 ```
 Metastudent-Data is required for the execution of the program.
