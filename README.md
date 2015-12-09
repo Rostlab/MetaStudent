@@ -133,11 +133,15 @@ EXAMPLES
        Predict the MFO and BPO terms for sequences in test.fasta with a
        precomputed MFO BLAST output (see previous example; note the comma at
        the end).
-            metastudent -i test.fasta -o test.result --ontologies=MFO,BPO --blast-kickstart-databases=test.result_eval0.001_iters3_srcexp.mfo.blast,
+            metastudent -i test.fasta -o test.result --ontologies=MFO,BPO 
+            --blast-kickstart-databases=test.result_eval0.001_iters3_srcexp.mfo.blast,
 
 OUTPUT FORMAT
 
-       For each selected ontology (see --ontologies), one output file is produced (see -o).  Each line in each file associates a protein with a GO term and a reliability for the association (0.0 to 1.0). The following format is used: <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
+       For each selected ontology (see --ontologies), one output file is produced (see -o). 
+       Each line in each file associates a protein with a GO term and a reliability for
+       the association (0.0 to 1.0). The following format is used: 
+       <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
 
 
 ## HOWTO generate the distributable tar archive
