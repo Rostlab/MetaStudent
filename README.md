@@ -10,6 +10,13 @@ proteins.
 
 ## HOWTO Install
 
+* git clone https://github.com/Rostlab/MetaStudent.git
+* clone the data repositories (to be updated)
+* cd MetaStudent
+* sudo apt-get install pp-popularity-contest ( required during execution of the program )
+* python setup.py install
+
+
 ## HOWTO Run, Basics
 
 * Input
@@ -17,10 +24,14 @@ proteins.
 * Expected Results
 * ...
 
+## HOWTO generate the distributable tar archive
+
+* $ setup.py sdist
+
 ## Method Description
 
 * Authors: Tobias Hamp <hampt@rostlab.org>
-* Publications: Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013). "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
+* Publications: Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013), "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
 * Manpage: http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
 * Documentation: https://rostlab.org/owiki/index.php/Metastudent
 * Description (ML ? )
@@ -40,18 +51,6 @@ Perhaps:
 This is optional. Only needed if the tool has many configuration options. If the conf options are also already well described in a man page, this fact can just be cited on the `HOWTO Run, Basics`
 
 
-
-
-How to install the package
-=============================================
-1) git clone https://github.com/Rostlab/MetaStudent.git
-2) cd MetaStudent
-3) sudo apt-get install pp-popularity-contest ( required during execution of the program )
-4) python setup.py install
-       
-How to generate the distributable tar archive
-=============================================
-$ setup.py sdist
 
 Running the Program
 ===================
