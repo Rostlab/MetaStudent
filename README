@@ -1,3 +1,39 @@
+# Project Name
+
+2-3 sentences description
+
+## HOWTO Install
+
+## HOWTO Run, Basics
+
+* Input
+* Output
+* Expected Results
+* ...
+
+## Method Description
+
+* Authors
+* Publications
+* Description (ML ? )
+* Training / Test Data
+* ...
+
+## Evaluation
+
+Perhaps:
+
+* Performance measures used (F1 ?, Accuracy ?, ROC Curve ?, ...)
+* Comparison with other tools
+* ...
+
+## (OPTIONAL) HOWTO Run, Extended
+
+This is optional. Only needed if the tool has many configuration options. If the conf options are also already well described in a man page, this fact can just be cited on the `HOWTO Run, Basics`
+
+
+
+
 METASTUDENT - predictor of gene ontology terms from protein sequence
 ====================================================================
 
