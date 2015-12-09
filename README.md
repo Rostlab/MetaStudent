@@ -6,7 +6,8 @@ Function Ontology (MFO) and Biological Process Ontology (BPO) for input
 protein sequences by homology-based inference from already annotated
 proteins.
 
-Development Year:  2012
+**Development Year:**  2012
+
 **Authors:** Tobias Hamp <hampt@rostlab.org>
 
 **Publications:** Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013),
