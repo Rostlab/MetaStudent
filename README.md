@@ -19,8 +19,10 @@ proteins.
 
 ## Method Description
 
-* Authors
-* Publications
+* Authors: Tobias Hamp <hampt@rostlab.org>
+* Publications: Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013). "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
+* Manpage: http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
+* Documentation: https://rostlab.org/owiki/index.php/Metastudent
 * Description (ML ? )
 * Training / Test Data
 * ...
@@ -38,9 +40,7 @@ Perhaps:
 This is optional. Only needed if the tool has many configuration options. If the conf options are also already well described in a man page, this fact can just be cited on the `HOWTO Run, Basics`
 
 
-AUTHOR
-======
-Tobias Hamp <hampt@rostlab.org>
+
 
 How to install the package
 =============================================
@@ -178,21 +178,7 @@ For each selected ontology (see --ontologies), one output file is
 produced (see -o).  Each line in each file associates a protein with a
 GO term and a reliability for the association (0.0 to 1.0). The
 following format is used: <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
-       
 
-REFERENCES
-==========
-Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten,
-D., ... & Rost, B. (2013). Homology-based inference sets the bar high
-for protein function prediction. BMC Bioinformatics, 14(Suppl 3), S7.
-
-MANPAGE
-=======       
-http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
-       
-DOCUMENTATION
-============= 
-https://rostlab.org/owiki/index.php/Metastudent
  
 
 
