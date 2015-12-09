@@ -1,40 +1,64 @@
-# METASTUDENT (predictor of gene ontology terms from protein sequence)
-
+# METASTUDENT 
+## predictor of gene ontology terms from protein sequence
 
 Metastudent predicts Gene Ontology (GO) terms from the Molecular
 Function Ontology (MFO) and Biological Process Ontology (BPO) for input
 protein sequences by homology-based inference from already annotated
 proteins.
 
-* Development Year:  2012
+Development Year:  2012
+**Authors:** Tobias Hamp <hampt@rostlab.org>
+**Publications:** Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013), "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
+**Manpage:** http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
+**Documentation:** https://rostlab.org/owiki/index.php/Metastudent
 
-## HOWTO Install
+## Installation
+To install the Metastudent package, use the following commands:
+```
+git clone https://github.com/Rostlab/MetaStudent.git
+clone the data repositories (to be updated)
+cd MetaStudent
+sudo apt-get install pp-popularity-contest ( required during execution of the program )
+python setup.py install
+```
+Make sure that the *blastpgp* program is available. You can download *blastpgp* from package *blast-2.2.26* for the corresponding platform from the following FTP: 
+```
+ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST/
+```
+For Linux x64 please follow the following commands. With these commands *blastpgp* binaries are installed and added tho the PATH environment variable:
+```
+wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST/blast-2.2.26-x64-linux.tar.gz
+tar xf blast-2.2.26-x64-linux.tar.gz
+echo -e "[NCBI]\nData=$(pwd)/blast-2.2.26/data/" > ~/.ncbirc
+export PATH=$PATH:$(pwd)/blast-2.2.26/bin
+```
 
-* git clone https://github.com/Rostlab/MetaStudent.git
-* clone the data repositories (to be updated)
-* cd MetaStudent
-* sudo apt-get install pp-popularity-contest ( required during execution of the program )
-* python setup.py install
+## Configuration
+To run Metastudent first of all we need to configure it. The default Metastudent configuration are present in:
+```
+<package_data_dir>/metastudentrc.default
+```
+The following parameters must be set before running the program
+```
+DATABASE_BASE_PATH=<default-data-package-path>/dataset_201401
+BLASTPGP_EXE_PATH=/usr/bin/blastpgp
+JAR_INSTALL_FOLDER_PATH=/usr/share/metastudent
 
-
-## HOWTO Run, Basics
-
+Replace <default-data-package-path> with the path where metastudent-Data is.
+Make sure that the BLASTPGP_EXE_PATH and JAR_INSTALL_FOLDER_PATH are valid and exists.
+```
+## Running Metastudent
+Metastudent can be run by the following command after installation and configuration:
+```
 metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
 [--silent] [--output-blast] [--blast-only] [--all-predictions]
 [--ontologies=MFO or BPO or MFO,BPO]
 [--blast-kickstart-databases=BLAST_RESULT_FILE(S)] [--temp-dir=DIR]
-[--config=CONFIG_FILE] !!! Make sure your fasta file contains at most
-500 sequences !!!
+[--config=CONFIG_FILE] 
+```
+*Please make sure your fasta file contains at most 500 sequences.*
 
-Large (1 GB in total) data files necessary for the operation of
-metastudent are downloaded automatically on the first use of the
-program.  The download is restartable.  You can also make an explicit
-call to metastudentdata (by default /usr/bin/metastudentdata) to
-download the data files.  In case the data directory (by default
-/usr/share/metastudent-data) is not writable and you are not root, the
-operation is reattempted with sudo.
-
-OPTIONS
+### OPTIONS
 
        -i FASTA_FILE
            The input fasta file. Please try to remove any special formattings
@@ -104,7 +128,7 @@ OPTIONS
            settings of the configuration files found in the FILES section of
            this man page.
 
-FILES
+### FILES
 
        <package_data_dir>/metastudentrc.default
            The metastudent configuration file.
@@ -117,7 +141,7 @@ FILES
            The metastudent configuration file, overrides
            <sysconfdir>/metastudentrc.
 
-EXAMPLES
+## EXAMPLES
 
        The example test.fasta file can be found in <package_doc_dir>/examples
        (usually /usr/share/doc/metastudent/examples).
@@ -136,7 +160,7 @@ EXAMPLES
             metastudent -i test.fasta -o test.result --ontologies=MFO,BPO 
             --blast-kickstart-databases=test.result_eval0.001_iters3_srcexp.mfo.blast,
 
-OUTPUT FORMAT
+## OUTPUT FORMAT
 
        For each selected ontology (see --ontologies), one output file is produced (see -o). 
        Each line in each file associates a protein with a GO term and a reliability for
@@ -145,31 +169,23 @@ OUTPUT FORMAT
 
 
 ## HOWTO generate the distributable tar archive
-
-* $ setup.py sdist
-
+```
+$ setup.py sdist
+```
 ## Method Description
 
-* Authors: Tobias Hamp <hampt@rostlab.org>
-* Publications: Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013), "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
-* Manpage: http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
-* Documentation: https://rostlab.org/owiki/index.php/Metastudent
+To be UPDATED
+
 * Description (ML ? )
 * Training / Test Data
 * ...
 
 ## Evaluation
 
+TO BE UPDATED
+
 Perhaps:
 
 * Performance measures used (F1 ?, Accuracy ?, ROC Curve ?, ...)
 * Comparison with other tools
 * ...
-
-## (OPTIONAL) HOWTO Run, Extended
-
-This is optional. Only needed if the tool has many configuration options. If the conf options are also already well described in a man page, this fact can just be cited on the `HOWTO Run, Basics
- 
-
-
-
