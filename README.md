@@ -1,5 +1,5 @@
 # METASTUDENT 
-## predictor of gene ontology terms from protein sequence
+## Predictor of gene ontology terms from protein sequence
 
 Metastudent predicts Gene Ontology (GO) terms from the Molecular
 Function Ontology (MFO) and Biological Process Ontology (BPO) for input
@@ -8,8 +8,12 @@ proteins.
 
 Development Year:  2012
 **Authors:** Tobias Hamp <hampt@rostlab.org>
-**Publications:** Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013), "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
+
+**Publications:** Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013),
+"Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
+
 **Manpage:** http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
+
 **Documentation:** https://rostlab.org/owiki/index.php/Metastudent
 
 ## Installation
