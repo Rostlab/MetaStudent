@@ -19,41 +19,6 @@ proteins.
 
 ## HOWTO Run, Basics
 
-* Input
-* Output
-* Expected Results
-* ...
-
-## HOWTO generate the distributable tar archive
-
-* $ setup.py sdist
-
-## Method Description
-
-* Authors: Tobias Hamp <hampt@rostlab.org>
-* Publications: Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013), "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
-* Manpage: http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
-* Documentation: https://rostlab.org/owiki/index.php/Metastudent
-* Description (ML ? )
-* Training / Test Data
-* ...
-
-## Evaluation
-
-Perhaps:
-
-* Performance measures used (F1 ?, Accuracy ?, ROC Curve ?, ...)
-* Comparison with other tools
-* ...
-
-## (OPTIONAL) HOWTO Run, Extended
-
-This is optional. Only needed if the tool has many configuration options. If the conf options are also already well described in a man page, this fact can just be cited on the `HOWTO Run, Basics`
-
-
-
-Running the Program
-===================
 metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
 [--silent] [--output-blast] [--blast-only] [--all-predictions]
 [--ontologies=MFO or BPO or MFO,BPO]
@@ -170,14 +135,34 @@ EXAMPLES
        the end).
             metastudent -i test.fasta -o test.result --ontologies=MFO,BPO --blast-kickstart-databases=test.result_eval0.001_iters3_srcexp.mfo.blast,
 
+* Output format: For each selected ontology (see --ontologies), one output file is produced (see -o).  Each line in each file associates a protein with a GO term and a reliability for the association (0.0 to 1.0). The following format is used: <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
 
-OUTPUT FORMAT
-=============
-For each selected ontology (see --ontologies), one output file is
-produced (see -o).  Each line in each file associates a protein with a
-GO term and a reliability for the association (0.0 to 1.0). The
-following format is used: <PROTEIN ID><TAB><GO_TERM><TAB><RELIABILITY>
 
+## HOWTO generate the distributable tar archive
+
+* $ setup.py sdist
+
+## Method Description
+
+* Authors: Tobias Hamp <hampt@rostlab.org>
+* Publications: Hamp, T., Kassner, R., Seemayer, S., Vicedo, E., Schaefer, C., Achten, D., ... & Rost, B. (2013), "Homology-based inference sets the bar high for protein function prediction", BMC Bioinformatics, 14(Suppl 3), S7.
+* Manpage: http://manpages.ubuntu.com/manpages/saucy/man1/metastudent.1.html#contenttoc8
+* Documentation: https://rostlab.org/owiki/index.php/Metastudent
+* Description (ML ? )
+* Training / Test Data
+* ...
+
+## Evaluation
+
+Perhaps:
+
+* Performance measures used (F1 ?, Accuracy ?, ROC Curve ?, ...)
+* Comparison with other tools
+* ...
+
+## (OPTIONAL) HOWTO Run, Extended
+
+This is optional. Only needed if the tool has many configuration options. If the conf options are also already well described in a man page, this fact can just be cited on the `HOWTO Run, Basics
  
 
 
