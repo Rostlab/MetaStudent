@@ -25,11 +25,12 @@ cd MetaStudent
 sudo apt-get install pp-popularity-contest
 python setup.py install
 ```
-Metastudent-Data is required for the execution of the program.
+Metastudent-Data is required for the execution of the program. Please find the data at the following link:
 
 ```
-clone the data repositories (to be updated)
+https://www.dropbox.com/sh/3hm0w3jom6hwr46/AABIATIewd_byccHGUK89tQxa?dl=0
 ```
+Copy metastudent-data to your local drive and set the path accordingly in the config file.
 
 Make sure that the *blastpgp* program is available. You can download *blastpgp* from package *blast-2.2.26* for the corresponding platform from the following FTP: 
 ```
