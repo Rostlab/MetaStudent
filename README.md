@@ -18,21 +18,23 @@ proteins.
 **Documentation:** https://rostlab.org/owiki/index.php/Metastudent
 
 ## Installation
-To install the Metastudent package, use the following commands. pp-popularity-contest is required during execution of the program which is explained in the steps:
+Metastudent can easily be installed using apt-get command on any debian based system
 ```
-git clone https://github.com/Rostlab/MetaStudent.git
-cd MetaStudent
-sudo apt-get install pp-popularity-contest
-python setup.py install
+sudo apt-get install metastudent
+
 ```
-Metastudent-Data is required for the execution of the program. Please find the data at the following link:
+All the Metastudent related packages will also be installed. Type 'Y' on the console query to accept installation of all packages.
+
+Metastudent-Data is required for the execution of the program.
+Metastudent data will also be installed while installing metastudent package. If the data is not there, the data can be found on the following links.
+Please find the data at the following link:
 
 ```
 https://www.dropbox.com/sh/3hm0w3jom6hwr46/AABIATIewd_byccHGUK89tQxa?dl=0
 ```
-Copy metastudent-data to your local drive and set the path accordingly in the config file.
+Add the metastudent-data path accordingly in the config file.
 
-Make sure that the *blastpgp* program is available. You can download *blastpgp* from package *blast-2.2.26* for the corresponding platform from the following FTP: 
+Make sure that the *blastpgp* program is available. If not downloaded automatically ( check /usr/bin/blastpgp program's existance), you can download *blastpgp* from package *blast-2.2.26* for the corresponding platform from the following FTP: 
 ```
 ftp://ftp.ncbi.nlm.nih.gov/blast/executables/release/LATEST/
 ```
@@ -43,21 +45,26 @@ tar xf blast-2.2.26-x64-linux.tar.gz
 echo -e "[NCBI]\nData=$(pwd)/blast-2.2.26/data/" > ~/.ncbirc
 export PATH=$PATH:$(pwd)/blast-2.2.26/bin
 ```
+NOTE: Following issues have been noticed while running of metastudent. These steps may be necessary for execution
+```
+Confirm that the metastudentpkg folder in the python dist-package folder ( e.g. /usr/lib/python2.7/dist-packages/) contains commons.py file. If not, then copy commons.py from the git repository to the folder.
+```
 
 ## Configuration
-To run Metastudent first of all we need to configure it. The default Metastudent configuration are present in:
+Metastudent can be configured with a configuration file. The default Metastudent configuration are present in:
 ```
 <package_data_dir>/metastudentrc.default
 ```
 The following parameters must be set before running the program
-```
-DATABASE_BASE_PATH=<default-data-package-path>/dataset_201401
-BLASTPGP_EXE_PATH=/usr/bin/blastpgp
-JAR_INSTALL_FOLDER_PATH=/usr/share/metastudent
+The paths and various parameters can be changed by changes in this file.
 
-Replace <default-data-package-path> with the path where metastudent-Data is.
-Make sure that the BLASTPGP_EXE_PATH and JAR_INSTALL_FOLDER_PATH are valid and exists.
+If the user wants to use its own configuration file, then --config flag can be used
+Note:
 ```
+Confirm the parameter BLAST_SRC_CCO is present in config file being used. It was not present in the default configuration file. If BLAST_SRC_CCO is not present, then CCO prediction will not be processed and an EXCEPTION will be raised.
+Default: BLAST_SRC_CCO=goasp
+```
+
 ## Running Metastudent
 Metastudent can be run by the following command after installation and configuration:
 ```
@@ -69,7 +76,8 @@ metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
 ```
 *Please make sure your fasta file contains at most 500 sequences.*
 
-### OPTIONS
+### OPTIONSConfirm the parameter BLAST_SRC_CCO is present in config file being used. It was not present in the default configuration file. If BLAST_SRC_CCO is not present, then CCO output will not be correct.
+Default: BLAST_SRC_CCO=goasp
 
        -i FASTA_FILE
            The input fasta file. Please try to remove any special formattings
