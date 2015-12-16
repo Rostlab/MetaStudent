@@ -76,8 +76,7 @@ metastudent -i FASTA_FILE -o RESULT_FILE_PREFIX [--debug] [--keep-temp]
 ```
 *Please make sure your fasta file contains at most 500 sequences.*
 
-### OPTIONSConfirm the parameter BLAST_SRC_CCO is present in config file being used. It was not present in the default configuration file. If BLAST_SRC_CCO is not present, then CCO output will not be correct.
-Default: BLAST_SRC_CCO=goasp
+### OPTIONS
 
        -i FASTA_FILE
            The input fasta file. Please try to remove any special formattings
