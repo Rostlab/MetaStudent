@@ -17,7 +17,7 @@ proteins.
 
 **Documentation:** https://rostlab.org/owiki/index.php/Metastudent
 
-**Elixir: https://bio.tools/tool/tum.de/MetaStudent/1
+**Elixir:** https://bio.tools/tool/tum.de/MetaStudent/1
 
 ## Installation
 Metastudent can easily be installed using apt-get command on any debian based system
