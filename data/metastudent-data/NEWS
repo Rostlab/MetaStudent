@@ -1,0 +1,6 @@
+metastudent-data (20130425) unstable; urgency=low
+
+  * Package now provides a make file to allow regeneration of architecture
+    dependent data files.
+
+ -- Laszlo Kajan <lkajan@rostlab.org>  Thu, 25 Apr 2013 16:37:25 +0200

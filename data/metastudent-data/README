@@ -1,0 +1,4 @@
+metastudent-data - predictor of Gene Ontology terms from protein sequence - data files
+
+This package contains blast(1) databases. These are multi-platform files and
+are therefore installed in $(pkgdatadir) (as opposed to $(pkglibdir)).

@@ -1,0 +1,11 @@
+metastudent-data (2.0.0) unstable; urgency=low
+
+  * Fully updated and extended all data
+
+ -- Tobias Hamp <hampt@rostlab.org>  Sat, 14 Mar 2015 00:43:57 +0200
+
+metastudent-data (1.0.1) unstable; urgency=low
+
+  * Multi-platform BLAST databases are installed into pkgdatadir.
+
+ -- Laszlo Kajan <lkajan@rostlab.org>  Thu, 25 Apr 2013 16:28:17 +0200

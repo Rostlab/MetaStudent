@@ -1,0 +1,3 @@
+metastudent-data-2 - predictor of Gene Ontology terms from protein sequence - name mapping data file
+
+This package only contains one text file that a new version of metastudent needs. It is installed in $(pkgdatadir).

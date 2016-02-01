@@ -1,0 +1,2 @@
+hampt = Tobias Hamp <hampt@rostlab.org>
+lkajan = Laszlo Kajan <lkajan@rostlab.org>
