@@ -21,10 +21,16 @@ proteins.
 
 ## Installation
 Metastudent can easily be installed using apt-get command on any debian based system
-```
-sudo apt-get install metastudent
 
+```shell
+sudo apt-get install python-software-properties
+sudo apt-add-repository "deb http://rostlab.org/debian/ stable main contrib non-free"
+sudo apt-get update # ignore GPG error
+sudo apt-get install rostlab-debian-keyring # without verification
+sudo apt-get update
+sudo apt-get install metastudent
 ```
+
 All the Metastudent related packages will also be installed. Type 'Y' on the console query to accept installation of all packages.
 
 Metastudent-Data is required for the execution of the program.
@@ -34,6 +40,7 @@ Please find the data at the following link:
 ```
 https://www.dropbox.com/sh/3hm0w3jom6hwr46/AABIATIewd_byccHGUK89tQxa?dl=0
 ```
+
 Add the metastudent-data path accordingly in the config file.
 
 Make sure that the *blastpgp* program is available. If not downloaded automatically ( check /usr/bin/blastpgp program's existance), you can download *blastpgp* from package *blast-2.2.26* for the corresponding platform from the following FTP: 
