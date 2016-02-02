@@ -60,9 +60,11 @@ Confirm that the metastudentpkg folder in the python dist-package folder ( e.g. 
 
 ## Configuration
 Metastudent can be configured with a configuration file. The default Metastudent configuration are present in:
+
+```shell
+<package_data_dir>/metastudentrc.default # usually under /usr/share/metastudent
 ```
-<package_data_dir>/metastudentrc.default
-```
+
 The following parameters must be set before running the program
 The paths and various parameters can be changed by changes in this file.
 
@@ -200,6 +202,8 @@ $ setup.py sdist
 ```
 ## Method Description
 
+TODO
+
 To be UPDATED
 
 * Description (ML ? )
@@ -207,6 +211,8 @@ To be UPDATED
 * ...
 
 ## Evaluation
+
+TODO
 
 TO BE UPDATED
 
