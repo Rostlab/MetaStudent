@@ -188,13 +188,18 @@ $ setup.py sdist
 ```
 ## Method Description
 
-TODO
+GO (Gene Ontology) for CAFA
+
+GO has three parts: Molecular Function Ontology (MFO), Biological Process Ontology (BPO) and Cellular Component Ontology (CCO). CAFA considered only the MFO and BPO. Both correspond to two directed acyclic graphs and capture different aspects of protein function. Functional keywords ("GO terms") are nodes and their relationships are labeled edges. The ontology is hierarchical: following the edges from a node, each new term corresponds to a more general concept of the original function. All paths converge at the root node, which can simply be interpreted as, e.g., has a molecular function.
 
 To be UPDATED
 
 * Description (ML ? )
 * Training / Test Data
 * ...
+* 
+
+
 
 ## Evaluation
 
