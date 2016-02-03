@@ -22,25 +22,23 @@ proteins.
 Metastudent can easily be installed using apt-get command on any debian based system
 
 ```shell
+# Not Required for ubuntu
 sudo apt-get install python-software-properties
 sudo apt-add-repository "deb http://rostlab.org/debian/ stable main contrib non-free"
 sudo apt-get update # ignore GPG error
 sudo apt-get install rostlab-debian-keyring # without verification
 sudo apt-get update
+
+# Needed to be done for all debian based machines
 sudo apt-get install metastudent
 ```
 
 All the Metastudent related packages will also be installed. Type 'Y' on the console query to accept installation of all packages.
 
 Metastudent-Data is required for the execution of the program.
-Metastudent data will also be installed while installing metastudent package. If the data is not there, the data can be found on the following links.
-Please find the data at the following link:
+Metastudent data will also be installed while installing metastudent package. If the data is not there, the data can be found in the data folder of the github repository. This data folder contains the newest version of data ( version: 201401)
 
-```
-https://www.dropbox.com/sh/3hm0w3jom6hwr46/AABIATIewd_byccHGUK89tQxa?dl=0
-```
-
-Add the metastudent-data path accordingly in the config file.
+If not set by default, add the metastudent-data path to the DATABASE_BASE_PATH variable accordingly in the config file.
 
 Make sure that the *blastpgp* program is available. If not downloaded automatically ( check /usr/bin/blastpgp program's existance), you can download *blastpgp* from package *blast-2.2.26* for the corresponding platform from the following FTP: 
 ```
@@ -53,10 +51,6 @@ tar xf blast-2.2.26-x64-linux.tar.gz
 echo -e "[NCBI]\nData=$(pwd)/blast-2.2.26/data/" > ~/.ncbirc
 export PATH=$PATH:$(pwd)/blast-2.2.26/bin
 ```
-NOTE: Following issues have been noticed while running of metastudent. These steps may be necessary for execution
-```
-Confirm that the metastudentpkg folder in the python dist-package folder ( e.g. /usr/lib/python2.7/dist-packages/) contains commons.py file. If not, then copy commons.py from the git repository to the folder.
-```
 
 ## Configuration
 Metastudent can be configured with a configuration file. The default Metastudent configuration are present in:
@@ -65,15 +59,7 @@ Metastudent can be configured with a configuration file. The default Metastudent
 <package_data_dir>/metastudentrc.default # usually under /usr/share/metastudent
 ```
 
-The following parameters must be set before running the program
-The paths and various parameters can be changed by changes in this file.
-
 If the user wants to use its own configuration file, then --config flag can be used
-Note:
-```
-Confirm the parameter BLAST_SRC_CCO is present in config file being used. It was not present in the default configuration file. If BLAST_SRC_CCO is not present, then CCO prediction will not be processed and an EXCEPTION will be raised.
-Default: BLAST_SRC_CCO=goasp
-```
 
 ## Running Metastudent
 Metastudent can be run by the following command after installation and configuration:
