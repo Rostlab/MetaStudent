@@ -202,12 +202,48 @@ Analogously to CAFA, we use fixed sets of target proteins to compare prediction 
 
 ###Homology-based methods
 
-To be UPDATED
+####StudentA 
+Begin with 2-iteration PSI-BLAST against all Swiss-Prot proteins with GO annotations (E-Value < 0.1). Extract GO terms of the six top PSI-BLAST hits (or all if fewer than 6 hits found). Each identified GO term is scored 1.0 if the term is found in all 6 hits and 0.5 otherwise. Once the term-score pairs have been extracted, only the leaf terms of their propagation are retained. Then apply the following filter to reduce functional redundancy: (i) create branches by propagating each predicted leaf term separately; (ii) calculate all pairwise branch overlaps, with the overlap being defined as the number of common GO terms in both branches divided by the average branch size.
 
-* Description (ML ? )
-* Training / Test Data
-* ...
-* 
+Next, cluster all branches so that each pair from two different clusters overlaps less than 10%. For each cluster, the branch with the longest path to the root is chosen, reduced to its original leaf term with the original score and output to the user. As the redundancy reduction may filter out highly supported terms, we apply a final correction: if any pair of branches from previous steps overlaps over 90%, the term common to both and with the longest path to the root, i.e., the lowest common ancestor, is added to the result.
+
+####StudentB 
+Begin with 2-iteration PSI-BLAST against all Swiss-Prot proteins with GO annotations (E-Value < 0.002 for 1st and E-Value < 0.01 for 2nd round). Each PSI-BLAST hit is associated with the propagation of its GO terms and each term in the propagation is associated with the PSI-BLAST E-Value of the hit. We then define two scores.
+
+The template quality score gauges the reliability of the entire PSI-BLAST query with respect to the goal of assigning function. First, we calculate the raw template score as the average over the logarithms of all returned PSI-BLAST E-Values plus twice the standard deviation (also derived from the log(E-Value)). The standard deviation is added to correct for cases with relatively low top scores and relatively high averages. This raw template score is normalized into a value from 0 to 1 by mapping it into a percentile bin obtained from running PSI-BLAST in the same fashion on a sample of all Swiss-Prot proteins (e.g. a score obtained by 90% of the samples for all Swiss-Prot is scored 0.1 = 1-0.9). We call this percentile the template quality score.
+
+The combined leaf score measures the reliability of each predicted leaf. First, we compile the propagated set of all GO terms for all PSI-BLAST hits. Each term can occur in multiple hits and thus be associated with multiple E-Values. The support of a term is defined as the sum over the logarithm of its E-Values divided by the sum of the logarithm over the E-Values of all hits. The combined leaf score of a leaf in the set of GO terms above is then given by the average support of itself and all of its ancestors.
+
+Finally, we multiply template quality and combined leaf score for each leaf, combine all the leaf-score pairs in one set and output its propagation to the user.
+
+####StudentC
+
+Begin with 2-iteration PSI-BLAST against all Swiss-Prot proteins with GO annotations (E-Value < 0.1). Count how often a particular GO term appeared in the PSI-BLAST hits (without propagation). All nodes with counts are propagated through the GO tree. Instead of taking the maximum count of all children at each parent node, however, their values are summed up and added to that of the parent node (normalization to [0,1] by division by maximal value). We call this type of scoring the max support. The PSI-BLAST scores, on the other hand, are considered as follows.
+
+For each PSI-BLAST hit, we first read off the positive identity. This value is included in the default BLAST output and corresponds to the number of positives divided by the alignment length. (Each mutation column in the default BLAST output with a positive score by BLOSUM62 is a positive.) Then, we multiply the max support of each term with the highest associated positive identity (we may have many positive identities, because a GO term can be associated with multiple PSI-BLAST hits). The method outputs only the one branch corresponding to the highest scoring leaf term.
+
+
+###Post-CAFA re-parameterization
+
+After CAFA, we parameterized the above three basic homology-inference methods. For StudentA, we introduced the options to exclude predictions with a score of 0.5 and to choose the number of PSI-BLAST hits to consider (before: 6; now: 1, 5 or 9). For StudentC, we added alternative PSI-BLAST E-Value thresholds (before: 1e-01; now: 1e00, 1e-03 or 1e-06) and percentage pairwise sequence identity as an alternative to the positive identity. We also enabled the optional output of all branches, instead of restricting it to the most probable one. The original implementation of StudentB had a bug: an alternative graph_path table inverted the order of the columns by mistake. The results of this bug were submitted to CAFA. We fixed the bug and allowed for alternatives in the thresholds for E-Values and maximum numbers of PSI-BLAST hits (E-Value before: 1e-02; now: 1e00, 1e-03 or 1e-06; max. number of hits before: 250 [PSI-BLAST default]; now: 5, 50 or 500).
+
+For all methods, we also add the choice of the number of PSI-BLAST iterations (before: 2 for all methods; now: 1, 2 or 3). Finally, we enabled the filtering out of Swiss-Prot annotations with unclear experimental support (optional restriction to the following experimental GO evidence codes: IDA, IMP, IPI, IGI, IEP, TAS, IC, EXP).
+
+The re-parameterization created 36, 54, and 72 different parameter combinations for StudentA-C, respectively. We optimized the parameters by picking the combination leading to the highest Fmax (threshold measure; Eq. 1) on a hold-out data set. This data set comprised all Swiss-Prot proteins annotated with experimentally verified GO terms in 2010 ("Set 2010"). All proteins annotated before 2010 served as templates ("Set < 2010"). This ascertained that there was no overlap to the CAFA targets. In the following, we refer to the optimized student methods as StudentA'-C'.
+
+###Post-CAFA method combination
+
+Due to the end of the lecture during which the methods were developed, we could not combine them. We did this also post-CAFA. We randomly split Set 2010 into two equal parts (Set 2010a and 2010b). Parameters were optimized on the first split (2010a; as before, only with 2010a instead of 2010). These optimized variants of StudentA-C (say StudentA''-C'') were applied to the second split (2010b). Then, we switched the roles of the two sets and repeated the procedure to obtain predictions for each protein in Set 2010. With these predictions, we trained a commonly used meta classifier [13], namely a weighted least-squares linear regression model. This corresponded to the formula x*A' + y*B' + z*C' + i = p, where A', B' and C' are the results of the student methods for each predicted GO term and [x-z] and i are the coefficients to optimize in the regression so that p reflects the reliability of the GO term. In order to meta-predict a new target protein, we first annotate it with methods StudentA'-C'. Each predicted GO term is then converted into a vector of three elements (one dimension for each method) and put into the formula above. The resulting value of p is the reliability of the GO term for the given target. We refer to this predictor as MetaStudent'.
+
+###Baseline classifiers
+
+The CAFA organizers implemented the following three baseline classifiers to gauge the improvement of current function predictiors over old or naïve methods [11]. (1) Priors. Every target has the same annotations and each term's score is the probability of that term occurring in Swiss-Prot. (2) BLAST. Target annotations are simply the maximum sequence identity returned by BLAST under default parameters when aligning a target with all proteins annotated with a given term. (3) GOtcha. Using the same BLAST results as BLAST, Gotcha [8] I-Scores are calculated as the sum of the negative logarithm of the E-Value of the alignment between the target protein and all proteins associated with a given term. Additionally, we introduce Priors', which simply returns the entire GO annotation of a random Swiss-Prot protein. Scores are assigned as in Priors.
+
+###Data sets
+
+We used five different data sets for method development and evaluation. All are exclusively derived from GO and the GO annotated proteins from Swiss-Prot and only differ in their release dates. The first three methods used the GO/Swiss-Prot releases from Oct. 2010 ("Set < 2010_10") for both development and group-internal evaluations. We updated to the versions from Dec. 2010 ("Set < 2010_12") and submitted all 48,298 CAFA targets with each method. For post-CAFA developments, we used the release of Jan. 2010 as the source for template annotations ("Set < 2010"). The independent data set needed for post-CAFA parameter optimization then contained all proteins annotated between January and December 2010 ("Set 2010"). Analogously to CAFA, we ignored proteins that had any GO annotation before January 2010 and only retained experimental annotations in the remaining proteins. Experimental GO evidence codes were: IDA, IMP, IPI, IGI, IEP, TAS, IC, and EXP (same as in CAFA). "Set_2010" contained 1752 targets with BPO and 1351 with MFO annotations.
+
+The CAFA organizers provided the original CAFA targets (436 with BPO and 366 with MFO annotations). They correspond to the proteins annotated between January and May 2011 ("Set 2011"). This set was derived following a similar algorithm as those in "Set 2010". The difference was that the CAFA organizers also excluded annotations from the GOA project in proteins annotated before January 2011 (a resource we left untouched). We used the annotations in "Set < 2010_12" to predict proteins in "Set 2011".
 
 
 
