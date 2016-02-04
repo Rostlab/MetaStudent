@@ -277,5 +277,26 @@ The top-20 and threshold measure were the two main metrics in the CAFA meeting. 
 We also employed Fmax in order to choose among alternative parameters during method development after CAFA.
 
 
-####Comparison with other tools
-* ...
+###Results/Comparison with other tools
+
+####Wide performance spread of homology-based inference
+
+Our three homology-based predictors of protein function (StudentA-C) performed very differently (Figure 5, dark blue; note: all data compiled exclusively on the CAFA targets and with data available before the CAFA submission). This was true for both categories, namely for biological process (BPO, Figure 5, top panels) and for molecular function (MFO, Figure 5, lower panels) and for all performance measures (Figure 5: each column signifies one particular measure). For instance, StudentA performed slightly better than StudentC by the top-20 measure (Methods) and slightly worse by the threshold criterion (Methods). While StudentA and StudentC mostly surpassed the baseline tests (PRIORS and BLAST), they even topped the GOtcha baseline (dark green) for many thresholds. In the BPO category (threshold measure), StudentC actually outperformed all but two of the other 36 CAFA predictors until a recall of about 0.2 (not shown). Note that the curves for StudentA-C in Figure 5 are identical to those calculated by the CAFA organizers.
+
+
+![alt tag](http://static-content.springer.com/image/art%3A10.1186%2F1471-2105-14-S3-S7/MediaObjects/12859_2013_5696_Fig5_HTML.jpg)
+
+
+####Post-CAFA optimization renders homology-based inference competitive
+
+When we changed our methods post-CAFA, we carefully avoided using any information that was not available at the CAFA submission deadline. Nevertheless, we are treating our optimized predictors (StudentA'-C', and MetaStudent') differently to clearly mark the point that these methods did not compete at CAFA. All changes were straightforward (e.g. optimization of simple thresholds) in the sense that they did not require any of the knowledge that we gained at CAFA. They would have been done by anyone with enough time before submission. This reality is important because they improved performance markedly. Our best single method that exclusively used homology information (StudentC') even outperformed the advanced method GOtcha in almost all respects. MetaStudent', the combination of all three methods, was consistently on par or better than all others, including GOtcha.
+
+####Leaf threshold measure suggested very different view
+
+There is evidence that the top-20 and the threshold measure penalize methods that provide a decision as to which function is predicted and favor methods that output huge lists of scored GO terms (Discussion). If so, their use as the scoring to be optimized may go against the interest of users (Discussion). In contrast, our new leaf threshold measure (Methods) favors predictions with reasonable amounts of terms over those with overly many. It first reduces all predicted GO terms to the leaf terms and then compares those to the leaves of the true annotation. Achieving, e.g., a recall of 1.0 simply by outputting the entire GO is therefore impossible. This reveals just how bloated predictions can be (Figure 5: rightmost panels): For instance, the baseline background "method" Priors (i.e., predicting all GO terms for each target and scoring them by frequency) is now numerically reduced to where it belongs, namely to a very bad performance. Priors' (i.e., randomly picking a protein annotation from Swiss-Prot and scoring terms by frequency), on the other hand, shows up competitive for levels of recall < 0.1 in the MFO category. Since also Priors stopped at recall 0.1, there appears to exist a very common low level leaf in GO. In the BPO, a larger and more complex hierarchy, Priors' fails, too. It remains unclear whether the bad performance of other baseline classifiers (BLAST, GOtcha) under the leaf threshold is due to unnecessarily large predictions in order to achieve high recall or to deeper methodological problems. In any case, our results show that even under this most rigorous measure, we can see fine grained separations between methods.
+
+####Homology-based method ranks very high
+
+CAFA decided to rank methods according to the Fmax score on the threshold measure (Eqn. 1). For compatibility, we followed this approach (Table 2: all methods provided in this contribution, plus the top mark presented at CAFA, namely FunctionSpace). For comparison, we also provide the scores for the top ranking method (FunctionSpace). The complete list presented at CAFA contained 36 methods; for 15 of these, the ranks have been released. Of all methods in Table 2, only StudentA, Gotcha, and "best" were in the list. StudentB-C were excluded because only one method per group was considered (we had correctly chosen Student A for this). StudentA'-C' and MetaStudent' were not ranked as they were developed post-CAFA with pre-CAFA data. The best homology-only method (StudentA) was in the top 8 only for BPO, while it dropped to rank 13 for MFO. In contrast, two of the baseline methods, namely Priors and Gotcha both ranked higher for MFO than for BPO. In fact, StudentA ranked worse than both baseline methods according to MFO and better than both for BPO.
+
+All our homology-only post-CAFA methods reached F1 scores consistently higher than that of StudentA. Our best method (MetaStudent') performed rather well by this criterion and would have ranked in the list of the top three at CAFA, had the method been completed in time. Its F1 scores would have been very similar to those of the top contender (FunctionSpace).
