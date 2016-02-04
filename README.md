@@ -207,6 +207,8 @@ Begin with 2-iteration PSI-BLAST against all Swiss-Prot proteins with GO annotat
 
 Next, cluster all branches so that each pair from two different clusters overlaps less than 10%. For each cluster, the branch with the longest path to the root is chosen, reduced to its original leaf term with the original score and output to the user. As the redundancy reduction may filter out highly supported terms, we apply a final correction: if any pair of branches from previous steps overlaps over 90%, the term common to both and with the longest path to the root, i.e., the lowest common ancestor, is added to the result.
 
+![alt tag](http://static-content.springer.com/image/art%3A10.1186%2F1471-2105-14-S3-S7/MediaObjects/12859_2013_5696_Fig2_HTML.jpg)  
+
 
 ####StudentB 
 Begin with 2-iteration PSI-BLAST against all Swiss-Prot proteins with GO annotations (E-Value < 0.002 for 1st and E-Value < 0.01 for 2nd round). Each PSI-BLAST hit is associated with the propagation of its GO terms and each term in the propagation is associated with the PSI-BLAST E-Value of the hit. We then define two scores.
@@ -217,11 +219,15 @@ The combined leaf score measures the reliability of each predicted leaf. First, 
 
 Finally, we multiply template quality and combined leaf score for each leaf, combine all the leaf-score pairs in one set and output its propagation to the user.
 
+![alt tag](http://static-content.springer.com/image/art%3A10.1186%2F1471-2105-14-S3-S7/MediaObjects/12859_2013_5696_Fig3_HTML.jpg) 
+
 ####StudentC
 
 Begin with 2-iteration PSI-BLAST against all Swiss-Prot proteins with GO annotations (E-Value < 0.1). Count how often a particular GO term appeared in the PSI-BLAST hits (without propagation). All nodes with counts are propagated through the GO tree. Instead of taking the maximum count of all children at each parent node, however, their values are summed up and added to that of the parent node (normalization to [0,1] by division by maximal value). We call this type of scoring the max support. The PSI-BLAST scores, on the other hand, are considered as follows.
 
 For each PSI-BLAST hit, we first read off the positive identity. This value is included in the default BLAST output and corresponds to the number of positives divided by the alignment length. (Each mutation column in the default BLAST output with a positive score by BLOSUM62 is a positive.) Then, we multiply the max support of each term with the highest associated positive identity (we may have many positive identities, because a GO term can be associated with multiple PSI-BLAST hits). The method outputs only the one branch corresponding to the highest scoring leaf term.
+
+![alt tag]( http://static-content.springer.com/image/art%3A10.1186%2F1471-2105-14-S3-S7/MediaObjects/12859_2013_5696_Fig4_HTML.jpg) 
 
 
 ###Post-CAFA re-parameterization
@@ -247,15 +253,29 @@ We used five different data sets for method development and evaluation. All are 
 The CAFA organizers provided the original CAFA targets (436 with BPO and 366 with MFO annotations). They correspond to the proteins annotated between January and May 2011 ("Set 2011"). This set was derived following a similar algorithm as those in "Set 2010". The difference was that the CAFA organizers also excluded annotations from the GOA project in proteins annotated before January 2011 (a resource we left untouched). We used the annotations in "Set < 2010_12" to predict proteins in "Set 2011".
 
 
-
 ## Evaluation
 
-TODO
+###Performance measures used 
+####Top-20
+Given the prediction of a single protein, the top-20 measure first reduces the prediction to the terms with the highest reliability (Figure 1: green nodes with score 0.8). It then defines recall as the number of correctly predicted GO terms divided by the number of all true GO terms. Precision corresponds to the number of correctly predicted GO terms divided by the number of all predicted GO terms. In Figure 1, for example, recall is 1/11 = 0.09 and precision is 1/2 = 0.5. If a target is not predicted at all, it is assigned a recall of 0.0. Precision is not calculated in such a case and has no influence. Repeating this for all targets, we obtain the average recall and precision. This is the first point in the recall-precision curve. In order to fill the curve, we gradually add the terms with 2nd, 3rd, ..., 20th highest reliability to the predictions and recalculate all of the above. 
 
-TO BE UPDATED
+####Threshold
 
-Perhaps:
+The threshold measure [4] follows a similar concept as top-20. Instead of considering a certain number of terms for each target at a time the measure demands a threshold between 0.0 and 1.0. In case of a threshold of 0.82, for example, each prediction is reduced to terms with a reliability greater than or equal to 0.82. Recall and precision can then be calculated analogously to the top-20 measure. A curve is obtained by lowering the threshold in steps of 0.01 from 1.0 to 0.0.
 
-* Performance measures used (F1 ?, Accuracy ?, ROC Curve ?, ...)
-* Comparison with other tools
+####Leaf threshold
+
+The leaf threshold measure, finally, operates exclusively on the leaves of a propagation (red nodes in Figure 1). First, predicted and experimental subgraphs are reduced to their leaf terms (Figure 1: experimental leaves on the left, predicted leaves on the right). Then, we define a threshold T as before, e.g. T = 0.82, and reduce each prediction to the leaves with a reliability ≥ T. The recall of a single prediction is given by the number of correctly predicted leaves divided by the number of all experimental leaves. Precision is defined analogously. Consequently, we can derive a recall-precision curve in the same way as for the threshold measure. In Figure 1, we obtain the first non-empty prediction as soon as the threshold reaches 0.80 (the highest score of all predicted leaves is 0.8). In this case, recall and precision correspond to 0/3 = 0.0 and 0/1 = 0.0.
+
+The leaf threshold measure is orthogonal to the top-20 and threshold measure: in the case of low recall, for example, the former two measures remove specific GO terms from the prediction and retain only the more general terms. Naturally, more general terms have a higher chance to overlap with the experimental propagation than specific terms, resulting in higher precision. However, the leaves of this reduced prediction are not more likely to overlap with the leaves of the experimental annotation. If the full prediction was the best estimate of the experimental leaves, the reduced version could even result in recall = precision = 0.0 by the leaf threshold measure, because the reduction might remove all correctly predicted leaves. Our new measure assesses how well the exact functions of a protein are predicted. Too general or specific predictions are penalized.
+Maximum F1 score
+The top-20 and threshold measure were the two main metrics in the CAFA meeting. The leaf measure is introduced here for the first time. In order to rank methods, the CAFA organizers additionally used the maximum F1 score over all recall-precision pairs obtained with the threshold measure (Fmax). The F1 score is defined as:
+
+
+![alt tag](http://static-content.springer.com/image/art%3A10.1186%2F1471-2105-14-S3-S7/MediaObjects/12859_2013_5696_Equ1_HTML.gif)
+
+We also employed Fmax in order to choose among alternative parameters during method development after CAFA.
+
+
+####Comparison with other tools
 * ...
